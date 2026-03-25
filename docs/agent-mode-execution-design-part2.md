@@ -77,9 +77,96 @@ sequenceDiagram
 2. 设置 agent temperature
 3. 把 request location 视为 `ChatLocation.Agent`
 
+这里需要特别补一句，因为这正是很多人会误解的地方：**intent 选定之后，系统下一步并不是让模型自己决定“我要不要造一个什么 loop”，而是先进入该 intent 对应的代码处理分支。**
+
+以 Agent Mode 为例，`AgentIntent.handleRequest()` 会先检查这次请求是不是特殊分支：
+
+1. 如果 `request.command === 'compact'`，它会直接走 `handleSummarizeCommand()`。
+2. 只有在普通 Agent 请求下，才会继续落回默认的 request handler 主链。
+
+这说明“intent 已确定”之后，下一步首先是**代码侧执行分支选择**，而不是 loop 选择权先交给模型。
+
 #### Step 4：启动 DefaultToolCallingLoop
 
 `DefaultIntentRequestHandler.runWithToolCalling()` 会构造 `DefaultToolCallingLoop`。它是整个自治执行的引擎实例。
+
+这一步也非常关键：在当前实现里，主 Agent 请求使用哪一种 loop，并不是由 LLM 根据聊天内容临时生成或投票决定的，而是由代码把它绑定到具体类上。
+
+对主 Agent 路径来说，绑定关系大致是：
+
+1. 先确定当前 intent。
+2. intent 构造对应的 `IIntentInvocation`。
+3. `DefaultIntentRequestHandler.runWithToolCalling()` 明确实例化 `DefaultToolCallingLoop`。
+
+也就是说，**主 loop 类型是代码固定下来的，模型只是在这个既定 loop 协议里决定“本轮调用什么工具、下一步做什么”，并不决定 loop 类本身是什么。**
+
+### 1.3 Intent 选定之后，到底是谁决定用哪一种 Loop
+
+这个问题最好直接拆开回答，因为里面其实混了两层不同的“决定”：
+
+1. 决定是否进入 loop。
+2. 决定进入哪一种 loop。
+
+#### 第一层：不是所有 intent 都一定进入 tool-calling loop
+
+intent 确定之后，系统先进入该 intent 的 `handleRequest()` 或默认 request handler 逻辑。也就是说，下一跳首先是“这个 intent 对应的处理分支”，而不是无条件进入某个 loop。
+
+以 Agent intent 为例：
+
+1. `/compact` 是特殊分支，会直接走同步压缩逻辑。
+2. 普通 Agent 请求才会继续进入 `DefaultIntentRequestHandler`。
+
+因此，intent 之后并不是“立刻生成 loop”，而是先看这次请求是否命中该 intent 自己定义的特殊路径。
+
+#### 第二层：一旦要进入 loop，loop 类型由代码绑定，不由 LLM 生成
+
+当请求确实需要进入多轮工具执行时，当前实现采用的是**代码显式绑定 loop 类**，而不是让模型根据内容临时创造一种 loop 结构。
+
+主 Agent 路径里，这个绑定在 [runWithToolCalling](../src/extension/prompt/node/defaultIntentRequestHandler.ts#L318) 写得很直接：它会创建 `DefaultToolCallingLoop`。
+
+子代理路径则是另一组同样由代码预定义好的 loop：
+
+1. 检索子代理使用 [SearchSubagentToolCallingLoop](../src/extension/prompt/node/searchSubagentToolCallingLoop.ts#L39)
+2. 执行子代理使用 [ExecutionSubagentToolCallingLoop](../src/extension/prompt/node/executionSubagentToolCallingLoop.ts#L38)
+
+所以这里真正“可变”的，是：
+
+1. 当前请求会不会走特殊分支。
+2. 当前主代理会不会调用某个 subagent 工具。
+3. 模型在既定 loop 内会不会使用某些工具。
+
+而这里**不变**的，是：
+
+1. 主 Agent 主链默认使用 `DefaultToolCallingLoop`。
+2. search subagent 默认使用 `SearchSubagentToolCallingLoop`。
+3. execution subagent 默认使用 `ExecutionSubagentToolCallingLoop`。
+
+#### 第三层：LLM 决定的是工具调用内容，不是 loop 类型
+
+大模型真正参与决定的部分，主要发生在 loop 已经建立之后：
+
+1. 这一轮要不要调用工具。
+2. 要调用哪个工具。
+3. 工具调用参数是什么。
+4. 在收到工具结果后是否继续推进。
+
+但它并不负责：
+
+1. 选择 `DefaultToolCallingLoop` 还是 `SearchSubagentToolCallingLoop` 这种类级别执行器。
+2. 在运行中“发明一种新的 loop 类型”。
+3. 把执行框架从默认 loop 改写成另一套运行时实现。
+
+所以，最精确的说法是：**LLM 决定的是 loop 里的动作，不是 loop 的类绑定。**
+
+#### 可以把它压成一张判断表
+
+| 问题 | 谁决定 |
+| --- | --- |
+| 当前请求是不是进入 Agent intent | 代码侧的 participant / command / intent 选择链 |
+| 当前 intent 是否先走特殊分支，例如 `/compact` | 该 intent 的 `handleRequest()` 代码 |
+| 主 Agent 请求使用哪一种主 loop | 代码，当前绑定到 `DefaultToolCallingLoop` |
+| 某个 subagent 请求使用哪一种子 loop | 代码，分别绑定到 search / execution 子代理 loop |
+| loop 内这一轮具体调用什么工具 | LLM 在既定 loop 协议中决定 |
 
 #### Step 5：构造 prompt context
 
@@ -1171,6 +1258,431 @@ stateDiagram-v2
 
 这张小图不是新的执行架构，而是把上一张矩阵翻译成用户更容易感知的状态迁移：
 
+---
+
+## 20. Agent Mode 里的提示词是如何按阶段组织的
+
+如果不按 intent，而是按运行阶段来看，Agent Mode 并不是“只生成一次 prompt”。更准确地说，它会反复经历下面几层：
+
+1. 先收集和改写本轮要用的上下文。
+2. 再决定这一轮到底有哪些工具可见。
+3. 然后把系统规则、历史、附件、用户请求、工具结果渲染成 messages。
+4. 最后再把 tools schema、request options、telemetry 一起封装成真实模型请求。
+
+这里最容易混淆的一点是：
+
+1. 狭义的“prompt”通常指 `messages` 里的文本与多模态内容。
+2. 广义的“模型输入”还包括工具 schema、tool choice、temperature、location 等结构化参数。
+3. 对模型行为来说，这两部分都重要；但源码里它们不是在同一个函数里一次性拼出来的。
+
+### 20.1 先给结论：六个主要阶段
+
+| 阶段 | 主要实现 | 主要输入来源 | 产物 | 是否直接进入本轮 `messages` | 这一阶段是否真的调用 LLM |
+| --- | --- | --- | --- | --- | --- |
+| 0. 会话前置控制 | [ToolCallingLoop.runStartHooks()](../src/extension/intents/node/toolCallingLoop.ts#L585) | `request.hooks`、session state、历史 turn、subagent 状态 | `additionalHookContext`、可能的阻断/追加上下文 | 否，先存到 loop 状态 | 否 |
+| 1. 本轮上下文快照 | [ToolCallingLoop.createPromptContext()](../src/extension/intents/node/toolCallingLoop.ts#L217) | 用户请求或 continuation、stop hook reason、历史、tool results、references、mode instructions | `IBuildPromptContext` | 否，这是 render 前的结构化上下文 | 否 |
+| 2. Prompt 策略与预算决策 | [AgentIntentInvocation.buildPrompt()](../src/extension/intents/node/agentIntent.ts#L366) | `promptContext`、endpoint、tokenizer、prompt registry、自定义 instructions、codebase refs、summary 状态 | `AgentPromptProps`、summarization 决策、最终 `IBuildPromptResult` | 间接进入，决定后续 render 内容 | 否 |
+| 3. 文本 prompt 渲染 | [AgentPrompt](../src/extension/prompts/node/agent/agentPrompt.tsx#L83) | 系统规则、全局上下文、历史、附件、用户消息、工具结果、提醒语 | `messages` | 是 | 否 |
+| 4. 请求封装与工具 schema 注入 | [DefaultToolCallingLoop.fetch()](../src/extension/prompt/node/defaultIntentRequestHandler.ts#L691) | `messages`、normalized tool schema、request options、telemetry | `makeChatRequest2(...)` 的请求体 | `messages` 原样进入；schema 作为并列结构进入 | 是，这一步真正发请求 |
+| 5. 摘要/压缩子流程 | [SummarizedConversationHistory](../src/extension/prompts/node/agent/summarizedConversationHistory.tsx#L418) | 超预算历史、tool rounds、tool results、summary 模式 | summary 文本写回历史 round/metadata | 不一定直接进当前主 prompt，但会影响下一次 render | 是，但这是另一条 summarization 请求 |
+
+所以如果把问题压缩成一句话，可以这样说：
+
+> Agent Mode 的提示词不是一次性模板拼接，而是“控制面先产出上下文快照，prompt 层再把它渲染成 messages，请求层再把 messages 和工具 schema 一起送给模型”。
+
+### 20.2 阶段 0：首轮 prompt 之前，hooks 先决定要不要加料
+
+这一步发生在真正进入 loop 之前，见 [ToolCallingLoop.runStartHooks()](../src/extension/intents/node/toolCallingLoop.ts#L585)。它做的事情不是 render prompt，而是准备 prompt 之后要吃的“前置附加上下文”。
+
+这一阶段可能提供的来源有：
+
+1. `SessionStart` hook 返回的上下文。
+2. `SubagentStart` hook 返回的上下文。
+3. transcript service 对已有历史的回放。
+4. 当前用户消息本身，被提前写入 transcript。
+
+这里产出的关键变量是 `additionalHookContext`。它不会立刻变成 prompt 文本，而是先挂在 loop 上，等到下一步 `createPromptContext()` 时再进入 `promptContext.additionalHookContext`。
+
+换句话说，hooks 先改写“原料”，不是直接改写最终 prompt 字符串。
+
+### 20.3 阶段 1：`createPromptContext()` 把原料整理成一轮快照
+
+真正的“这一轮 prompt 用什么”是在 [ToolCallingLoop.createPromptContext()](../src/extension/intents/node/toolCallingLoop.ts#L217) 里被收口的。
+
+这个阶段的来源非常关键，因为它定义了每轮 prompt 的基底：
+
+| 来源类别 | 具体来源 | 在 `promptContext` 中的落点 |
+| --- | --- | --- |
+| 当前 query | 普通用户消息、`Please continue`、或 stop hook reason 格式化后的文本 | `query` |
+| 历史对话 | 去掉 `PromptFiltered` 轮次后的 `conversation.turns` | `history` |
+| 用户附件/引用 | `request.references` | `chatVariables` |
+| 工具相关 | 当前轮工具引用、tool invocation token、available tools | `tools` |
+| 工具执行回灌 | 历史 round、当前 round 的 `toolCallRounds` / `toolCallResults` | `toolCallRounds`、`toolCallResults` |
+| 模式指令 | `request.modeInstructions2` | `modeInstructions` |
+| hook 注入 | `additionalHookContext` | `additionalHookContext` |
+| 继续执行状态 | continuation / stop-hook continuation | `isContinuation`、`hasStopHookQuery` |
+
+这一步仍然没有调用模型。它做的是把“散落在 request、conversation、hook、tools 里的信息”整理成一个稳定的 `IBuildPromptContext`。
+
+### 20.4 阶段 2：`buildPrompt()` 决定这轮 prompt 用哪套模板、要不要先压缩历史
+
+[AgentIntentInvocation.buildPrompt()](../src/extension/intents/node/agentIntent.ts#L366) 做的不是简单 render，它其实承担了 prompt 级策略层。
+
+这里会组合几类来源：
+
+1. [PromptRegistry.resolveAllCustomizations()](../src/extension/prompts/node/agent/promptRegistry.ts#L77) 解析模型家族对应的 system prompt、reminder、tool hint、identity rules、safety rules。
+2. `promptContext.chatVariables` 中已有的附件变量。
+3. codebase references，它们会在这里并入 variables，而不是只靠最初 request references。
+4. tokenizer 计算出的工具 token 成本。
+5. 当前会话的 summary / background compaction 状态。
+
+这一步的关键不是“把文本写出来”，而是决定：
+
+1. 用哪个 `SystemPrompt` 类。
+2. `userQuery` 用什么 tag 名。
+3. 是否触发前台 summarization。
+4. 是否消费已有的后台 compaction 结果。
+5. 当前 render 时是否启用 `SummarizedConversationHistory` 路径。
+
+所以这一层更像 prompt 的“编排器”，不是最终的“字符串模板”。
+
+### 20.5 阶段 3：`AgentPrompt` 才真正把 prompt 渲染成模型可见消息
+
+真正把结构化上下文变成 `messages` 的，是 [AgentPrompt](../src/extension/prompts/node/agent/agentPrompt.tsx#L83) 这一层以及它调用的一系列 prompt elements。
+
+如果把它拆开，可以看成五个块。
+
+#### A. 系统规则块
+
+来源：
+
+1. `CopilotIdentityRules`。
+2. `SafetyRules`。
+3. 不同模型家族对应的 `SystemPrompt` 实现，比如默认 prompt、Anthropic prompt、Gemini prompt。
+4. `MemoryInstructionsPrompt`。
+5. autopilot 模式下的 `task_complete` 规则提醒。
+
+这些内容主要在 [AgentPrompt.render()](../src/extension/prompts/node/agent/agentPrompt.tsx#L97) 和 [DefaultAgentPrompt](../src/extension/prompts/node/agent/defaultAgentInstructions.tsx#L110) 里组织。
+
+#### B. 全局会话上下文块
+
+来源：
+
+1. 用户 OS。
+2. workspace 结构与 workspace folders。
+3. 用户偏好。
+4. memory context。
+
+这些内容由 `GlobalAgentContext` 渲染，属于“会话开头的静态环境信息”，不是每轮重新从业务逻辑现算的代码理解结果。
+
+#### C. 历史块
+
+来源：
+
+1. 普通历史 turn。
+2. 历史用户消息里冻结过的 `renderedUserMessage`。
+3. 历史 tool call rounds 和 tool results。
+4. 如果启用了压缩，则改走 [SummarizedConversationHistory](../src/extension/prompts/node/agent/summarizedConversationHistory.tsx#L418)。
+
+对应实现主要是：
+
+1. [AgentConversationHistory](../src/extension/prompts/node/agent/agentConversationHistory.tsx#L46)
+2. [ChatToolCalls](../src/extension/prompts/node/panel/toolCalling.tsx)
+3. [SummarizedConversationHistory](../src/extension/prompts/node/agent/summarizedConversationHistory.tsx#L418)
+
+这里可以看到一个很重要的事实：工具结果并不是“只存在于 schema 外围”，它们会被重新编码进后续轮次的 prompt history 里，成为模型下一轮继续推理的文本依据。
+
+#### D. 当前用户消息块
+
+当前轮的 user message 不是只有一句用户原话，见 [AgentUserMessage](../src/extension/prompts/node/agent/agentPrompt.tsx#L341)。它会继续组合：
+
+1. `ChatVariables` 渲染出来的附件内容。
+2. `ToolReferencesHint`，告诉模型用户显式附加了哪些工具引用。
+3. `context` tag 中的当前日期、edited file events、notebook summary change、terminal state、todo list context、additional hook context。
+4. 当前 editor 位置上下文。
+5. `reminderInstructions`，包括 edit tool 提醒、notebook 提醒、skill adherence 提醒。
+6. 最后才是 `userRequest` tag 里的 `UserQuery`。
+
+而 `UserQuery` 自身也不是简单回显原文，见 [UserQuery](../src/extension/prompts/node/panel/chatVariables.tsx#L90)。如果用户输入的是 prompt file slash command，它会先转成 `Follow instructions in #...` 这样的文本，再进入最终 prompt。
+
+这解释了一个常见误解：Agent Mode 里的“用户消息”其实已经是二次加工过的结构化消息，不等于 UI 输入框里那一行原文。
+
+#### E. 自定义 instructions 块
+
+这一块的来源包括：
+
+1. `CustomInstructions` 读到的 instructions 文件。
+2. customizations index。
+3. `modeInstructions`。
+4. skill index 导出的 reminder。
+
+它们主要在 [AgentPrompt.getAgentCustomInstructions()](../src/extension/prompts/node/agent/agentPrompt.tsx#L182) 中合成，并根据配置决定进入 `SystemMessage` 还是 `UserMessage`。
+
+所以 Agent Mode 的 prompt 组织，不是“系统 prompt 一段 + 用户消息一段”那么简单，而是多层 prompt elements 叠加出来的。
+
+### 20.6 阶段 4：真正发给模型时，`messages` 旁边还会带一层结构化输入
+
+当 [DefaultToolCallingLoop.fetch()](../src/extension/prompt/node/defaultIntentRequestHandler.ts#L691) 调用 `makeChatRequest2(...)` 时，真正送给模型的不只是 `messages`，还包括：
+
+1. 经过 `normalizeToolSchema(...)` 的 tool definitions。
+2. `temperature`。
+3. `location`。
+4. `debugName`。
+5. `conversationId`、`turnId`。
+6. `requestKindOptions`，例如 subagent 请求会标记为 `kind: 'subagent'`。
+
+因此如果你问“模型到底怎么知道有哪些工具可以用”，答案不是在 `AgentPrompt.tsx` 里找，而是在这一层找：
+
+1. 文本 prompt 负责告诉模型行为规则、上下文和提醒。
+2. tool schema 负责告诉模型调用名、参数结构和 description。
+3. 两者一起构成完整的模型输入。
+
+### 20.7 阶段 5：summary 其实也是一条独立 prompt 链
+
+很多人会把 summary 当成“普通 prompt 里塞了一段历史摘要”。源码里更准确的情况是：summary 往往先通过单独的一次 prompt 请求被生成，然后再回写主会话。
+
+这条链在 [SummarizedConversationHistory](../src/extension/prompts/node/agent/summarizedConversationHistory.tsx#L418) 和其中的 `ConversationHistorySummarizer` 里最清楚。
+
+流程是：
+
+1. 发现当前主 prompt 预算紧张，或显式触发 `/compact`。
+2. 生成 summarization prompt。
+3. 发起一次单独的模型请求得到 summary。
+4. 把 summary 写回 `round.summary` 或 turn metadata。
+5. 下一轮主 prompt 渲染历史时，再把这份 summary 当作历史的一部分读出来。
+
+所以 summary 不是 prompt 的静态附录，而是另一条“为主 prompt 服务的 prompt 子流程”。
+
+### 20.8 一个总图：从原始输入到模型可见输入
+
+| 层次 | 主要内容 | 是否文本化 | 典型来源 |
+| --- | --- | --- | --- |
+| 控制层 | hooks、continuation、stop reasons、permission、summary 决策 | 大部分还不是 | request、conversation、hook outputs |
+| 上下文层 | `IBuildPromptContext` | 否 | `createPromptContext()` 汇总 |
+| 渲染层 | system messages、history、user message、tool call transcript | 是 | `AgentPrompt` 及子 elements |
+| 请求层 | tools schema、temperature、location、request kind | 否 | `fetch()` / `makeChatRequest2()` |
+| 压缩层 | summary prompt 与 summary metadata | 先是文本请求，再是结构化回写 | `SummarizedConversationHistory` |
+
+如果只看 `AgentPrompt.tsx`，你会以为 prompt 主要是模板问题；如果只看 `fetch()`，你又会以为 prompt 只是 request 包装问题。实际上两者之间还隔着 `createPromptContext()` 和 `AgentIntentInvocation.buildPrompt()` 这两层编排。
+
+### 20.9 最后回答“LLM 在哪里参与了提示词生成”
+
+这个问题要分两种参与方式。
+
+第一种，代码侧生成 prompt。这里 LLM 不参与：
+
+1. `runStartHooks()` 收集上下文。
+2. `createPromptContext()` 组装本轮快照。
+3. `AgentIntentInvocation.buildPrompt()` 选择 prompt 组件和 budget 路径。
+4. `AgentPrompt` / `AgentUserMessage` / `AgentConversationHistory` 把上下文渲染成 `messages`。
+5. `fetch()` 把 `messages` 和 tool schema 封装成请求。
+
+第二种，LLM 参与“为后续 prompt 生成新材料”。这里 LLM 会参与：
+
+1. 主模型生成 tool calls、assistant response、thinking。
+2. summarization 模型生成 summary。
+3. 这些结果被写回 history / round metadata，成为下一轮 prompt 的输入来源。
+
+所以更精确的表述不是“LLM 生成 prompt”，而是：
+
+> prompt 的结构由代码决定，但 prompt 的部分后续内容来源，尤其是 history 中的 assistant output、tool-use transcript 和 summary，会由前一次或另一条 LLM 请求产出，再回流到下一轮 prompt 中。
+
+这就是 Agent Mode 里提示词组织的核心闭环。
+
+---
+
+## 21. 不同模型家族下，system prompt 和 customizations 是怎么切换的
+
+上一节解释的是“prompt 在运行时怎么被拼出来”。这一节回答另一个紧邻的问题：
+
+1. 不同模型家族到底在哪里切换 prompt。
+2. 切换时只换 `SystemPrompt`，还是还能换别的部件。
+3. 如果多个 resolver 都可能命中，最终谁生效。
+
+先给结论：Agent Mode 不是在 `AgentPrompt.tsx` 里写一串 `if/else` 来挑 prompt，而是通过 `PromptRegistry` 做模型到 prompt customization 的解析。
+
+### 21.1 入口不在 `AgentPrompt`，而在 `PromptRegistry`
+
+核心接口在 [promptRegistry.ts](../src/extension/prompts/node/agent/promptRegistry.ts#L24)。一个模型族 resolver 不只可以提供 `resolveSystemPrompt()`，还可以覆盖这些点：
+
+1. `resolveSystemPrompt()`
+2. `resolveReminderInstructions()`
+3. `resolveToolReferencesHint()`
+4. `resolveCopilotIdentityRules()`
+5. `resolveSafetyRules()`
+6. `resolveUserQueryTagName()`
+
+而 [PromptRegistry.resolveAllCustomizations()](../src/extension/prompts/node/agent/promptRegistry.ts#L77) 会把这些覆盖点归并成一个 `AgentPromptCustomizations`：
+
+1. 没有被 resolver 覆盖的部分，回退到默认实现。
+2. 被覆盖的部分，只替换对应槽位，不要求整个 prompt 系统重写。
+
+所以这里的切换不是“整套 prompt 文件完全分叉”，而是“多槽位 customization”。
+
+### 21.2 注册入口：先把所有 resolver import 进来，再按 registry 规则匹配
+
+[allAgentPrompts.ts](../src/extension/prompts/node/agent/allAgentPrompts.ts#L1) 是注册入口。它的职责很简单：
+
+1. import 各模型家的 prompt 文件。
+2. 让这些文件在模块加载时执行 `PromptRegistry.registerPrompt(...)`。
+
+这里有一个非常重要的细节，源码自己就写了注释：
+
+1. `vscModelPrompts` 必须在 `gpt5Prompt` 之前 import。
+2. 目的就是保证某些更专门的 resolver 先注册，再参与后续匹配。
+
+这说明“导入顺序”不是无关紧要的打包细节，而是 resolver 选择语义的一部分。
+
+### 21.3 匹配优先级：先 `matchesModel()`，再 `familyPrefixes`
+
+[PromptRegistry.getPromptResolver()](../src/extension/prompts/node/agent/promptRegistry.ts#L64) 的选择规则很清楚：
+
+1. 先遍历所有带 `matchesModel()` 的 resolver。
+2. 第一个返回 `true` 的 resolver 直接胜出。
+3. 如果没有任何 `matchesModel()` 命中，再按 `familyPrefixes` 做前缀匹配。
+
+因此优先级不是“谁的 family 更长”，而是：
+
+1. 显式匹配函数优先。
+2. 前缀匹配兜底。
+3. 同类 resolver 的先后顺序受注册顺序影响。
+
+这也解释了为什么很多 OpenAI 新模型 resolver 的 `familyPrefixes` 是空数组，而是只靠 `matchesModel()` 精确命中。这样它们就可以覆盖掉更泛化的默认 OpenAI resolver。
+
+### 21.4 一个总表：不同模型族通常覆盖哪些 customization 槽位
+
+| 模型族/分支 | 代表 resolver | 主要匹配方式 | 至少覆盖哪些槽位 | 备注 |
+| --- | --- | --- | --- | --- |
+| 通用 OpenAI | [DefaultOpenAIPromptResolver](../src/extension/prompts/node/agent/openai/defaultOpenAIPrompt.tsx#L123) | `familyPrefixes` | `SystemPrompt`、`ReminderInstructions` | OpenAI 的默认兜底 |
+| GPT-5 | [DefaultGpt5PromptResolver](../src/extension/prompts/node/agent/openai/gpt5Prompt.tsx#L233) | `matchesModel()` | `SystemPrompt`、`ReminderInstructions`、`ToolReferencesHint`、`CopilotIdentityRules`、`SafetyRules` | 比默认 OpenAI 覆盖更深 |
+| GPT-5.4 | [Gpt54PromptResolver](../src/extension/prompts/node/agent/openai/gpt54Prompt.tsx#L183) | `matchesModel()` | `SystemPrompt`、`ReminderInstructions`、`CopilotIdentityRules`、`SafetyRules` | 把一部分工作流提醒下沉到 reminder |
+| GPT-5.1 | [Gpt51PromptResolver](../src/extension/prompts/node/agent/openai/gpt51Prompt.tsx#L280) | `matchesModel()` | `SystemPrompt`、`ReminderInstructions`、`CopilotIdentityRules`、`SafetyRules` | 与 GPT-5 系列共享一部分规则体系 |
+| Anthropic | [AnthropicPromptResolver](../src/extension/prompts/node/agent/anthropicPrompts.tsx#L765) | `familyPrefixes` + 内部条件 | `SystemPrompt`、`ReminderInstructions` | 同一族内部还会细分 Claude 4.5/4.6 等 |
+| Gemini | [GeminiPromptResolver](../src/extension/prompts/node/agent/geminiPrompts.tsx#L234) | `matchesModel()` / `familyPrefixes` | `SystemPrompt`、`ReminderInstructions` | 可按实验开关切到隐藏模型 prompt |
+| xAI / Grok | [XAIPromptResolver](../src/extension/prompts/node/agent/xAIPrompts.tsx#L115) | `familyPrefixes` | `SystemPrompt`、`userQueryTagName` | 会把 `userRequest` tag 改成 `user_query` |
+| Zai / GLM | [ZaiPromptResolver](../src/extension/prompts/node/agent/zaiPrompts.tsx#L170) | `matchesModel()` | `SystemPrompt`、`ReminderInstructions` | 主要靠 model 名精确匹配 |
+| VSC 内部模型 | [VSCModelPromptResolverA/B](../src/extension/prompts/node/agent/vscModelPrompts.tsx#L272) | `matchesModel()` + `familyPrefixes` | `SystemPrompt`、`ReminderInstructions` | 需要先于 GPT-5 resolver 注册 |
+
+这个表想表达的关键点是：**切换的对象不只是 system prompt 文本本身，而是一个可组合的 customization 集合。**
+
+### 21.5 OpenAI 路线不是一层，而是“默认兜底 + 更具体模型覆盖”
+
+OpenAI 这一支最能看出 registry 的设计意图。
+
+最底层是 [DefaultOpenAIPromptResolver](../src/extension/prompts/node/agent/openai/defaultOpenAIPrompt.tsx#L123)：
+
+1. 通过 `familyPrefixes = ['gpt', 'o4-mini', 'o3-mini', 'OpenAI']` 提供大范围默认匹配。
+2. 默认提供 `DefaultOpenAIAgentPrompt`。
+3. 还给出一个默认的 `OpenAIReminderInstructions`。
+
+但在它之上，又叠了很多更具体的 resolver，例如：
+
+1. [DefaultGpt5PromptResolver](../src/extension/prompts/node/agent/openai/gpt5Prompt.tsx#L233)
+2. [Gpt54PromptResolver](../src/extension/prompts/node/agent/openai/gpt54Prompt.tsx#L183)
+3. [Gpt51PromptResolver](../src/extension/prompts/node/agent/openai/gpt51Prompt.tsx#L280)
+
+它们的共同特点是：
+
+1. 大多使用 `matchesModel()` 精确命中。
+2. 一旦命中，就不会再落回泛化的 OpenAI 默认 resolver。
+3. 覆盖的槽位通常比默认 OpenAI 更多，不只是 `SystemPrompt`。
+
+这就是一个典型的“粗粒度默认 + 细粒度覆写”结构。
+
+### 21.6 GPT-5 分支为什么值得单独看
+
+GPT-5 分支很有代表性，因为它不只换 `SystemPrompt`，还明显扩张了 customization 范围。
+
+例如 [DefaultGpt5PromptResolver](../src/extension/prompts/node/agent/openai/gpt5Prompt.tsx#L233) 会同时覆盖：
+
+1. `SystemPrompt`
+2. `ReminderInstructions`
+3. `ToolReferencesHint`
+4. `CopilotIdentityRules`
+5. `SafetyRules`
+
+这说明在 GPT-5 路线上，设计者不是只想换一段 system text，而是把整套 agent 行为约束拆成多个可替换部件来调优。
+
+换句话说，模型适配粒度已经从“系统提示词模版”升级成了“提示词组件组合”。
+
+### 21.7 Anthropic 路线：同一大族内部还有二级分流
+
+Anthropic 这支更像“先匹配大族，再在 resolver 内部细分版本”。
+
+从 [AnthropicPromptResolver](../src/extension/prompts/node/agent/anthropicPrompts.tsx#L770) 往下看，可以发现它不是永远返回同一个类，而是根据 endpoint 和实验开关，选择不同的 prompt 变体，例如：
+
+1. `DefaultAnthropicAgentPrompt`
+2. `Claude45DefaultPrompt`
+3. `Claude46DefaultPrompt`
+
+这条路线的一个特点是：
+
+1. 同一个大模型族共享不少总体行为语义。
+2. 但某些版本会加入自己的上下文压缩、安全约束、任务跟踪、communication style 等细化要求。
+
+所以 Anthropic 的适配不是“每个版本一个完全独立 registry entry”，而更像“一个 resolver 内部再做版本调度”。
+
+### 21.8 Gemini 路线：同一 resolver 下可切换隐藏 prompt 变体
+
+[GeminiPromptResolver](../src/extension/prompts/node/agent/geminiPrompts.tsx#L234) 很适合用来说明“实验开关也会参与 customization 选择”。
+
+它的逻辑不是简单返回一个固定 prompt，而是：
+
+1. 如果命中 hidden model F，并且实验开关打开，就返回 `HiddenModelFGeminiAgentPrompt`。
+2. 否则返回 `DefaultGeminiAgentPrompt`。
+3. reminder 部分则统一走 `GeminiReminderInstructions`。
+
+这个 reminder 也不是普通兜底，它明确加入了两类 Gemini 特化约束：
+
+1. stronger replace-string hint
+2. “必须真的调用工具，不要用文字模拟 tool call”的强提醒
+
+所以 Gemini 这里体现的是：**system prompt 和 reminder instructions 可以独立演化，不必总是成对完全替换。**
+
+### 21.9 xAI 路线：连用户请求 tag 名都能改
+
+[XAIPromptResolver](../src/extension/prompts/node/agent/xAIPrompts.tsx#L115) 提供了一个很容易被忽略、但很能说明机制灵活性的例子：它不仅换 system prompt，还重写了 `resolveUserQueryTagName()`。
+
+结果就是：
+
+1. 默认情况下，用户请求包在 `userRequest` tag 下。
+2. 在 xAI/Grok 分支里，它会改成 `user_query`。
+
+这说明 prompt customization 的覆盖面已经深入到 prompt 结构标记层，而不只是自然语言内容层。
+
+### 21.10 Zai 和 VSC 模型分支说明了两种不同的“专门化”方式
+
+Zai 分支见 [ZaiPromptResolver](../src/extension/prompts/node/agent/zaiPrompts.tsx#L170)：
+
+1. `familyPrefixes` 为空。
+2. 主要靠 `matchesModel()` 从 `endpoint.model` 字符串里识别 `glm-4.6` / `glm-4.7` 一类模式。
+
+这代表的是一种“模型名特征识别型”专门化。
+
+VSC 内部模型分支见 [VSCModelPromptResolverA](../src/extension/prompts/node/agent/vscModelPrompts.tsx#L272) 和 [VSCModelPromptResolverB](../src/extension/prompts/node/agent/vscModelPrompts.tsx#L285)：
+
+1. 它们既有 `matchesModel()`，也有 `familyPrefixes`。
+2. 并且依赖更靠前的注册顺序来压过后面的 GPT-5 路线。
+
+这代表的是另一种“在共享 family 空间里优先抢占”的专门化。
+
+### 21.11 最后把整条链连起来
+
+如果把模型适配这件事串成一条最短路径，可以写成：
+
+1. [allAgentPrompts.ts](../src/extension/prompts/node/agent/allAgentPrompts.ts#L1) 导入所有 resolver。
+2. 每个 prompt 文件在模块初始化时执行 `PromptRegistry.registerPrompt(...)`。
+3. [PromptRegistry.getPromptResolver()](../src/extension/prompts/node/agent/promptRegistry.ts#L64) 先试 `matchesModel()`，再试 `familyPrefixes`。
+4. [PromptRegistry.resolveAllCustomizations()](../src/extension/prompts/node/agent/promptRegistry.ts#L77) 产出 `AgentPromptCustomizations`。
+5. [AgentIntentInvocation.buildPrompt()](../src/extension/intents/node/agentIntent.ts#L366) 在 render 前先解析这些 customizations。
+6. [AgentPrompt](../src/extension/prompts/node/agent/agentPrompt.tsx#L83) 再把这些 customization 槽位真正装进本轮 prompt。
+
+所以“模型家族切 prompt”并不是发生在最后一步 render 时临时判断，而是在 render 之前，先选好一套 customization 组件，再由 `AgentPrompt` 去消费。
+
+### 21.12 一句话总结
+
+> Agent Mode 的模型适配不是“换一个 system prompt 文件”这么简单，而是通过 `PromptRegistry` 先解析一整组可覆盖槽位，再把 system prompt、reminder、identity、安全规则、tool hint，甚至 user query tag 名一起装配进最终 prompt。
+
 1. 普通模式最容易落入 `Waiting`，因为它默认需要更多显式确认。
 2. `autoApprove` 的核心体验差异是中间多了一段 `Retrying`，很多错误会被系统先内部消化。
 3. `autopilot` 的核心体验差异是多了一段 `Continuing`，也就是系统认为“还不算真完成”，所以继续推进而不是直接收尾。
@@ -1294,7 +1806,7 @@ sequenceDiagram
             else 无更多 tool calls 或响应停止
                 L->>H: Stop / SubagentStop(stop_hook_active)
                 alt Stop hook 阻断结束
-                    H-->>L: reasons[]
+                    H-->>L: reasons list
                     L->>L: 写入 stopHookReason 与 round.hookContext
                     L->>M: 带阻断原因继续下一轮
                 else 允许结束
