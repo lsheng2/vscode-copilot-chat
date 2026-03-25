@@ -828,3 +828,77 @@ flowchart LR
 3. 直接承担网络请求或工具执行职责。
 
 这一层若越权，最容易出现的现象是 prompt 模板与运行时控制逻辑缠在一起，导致 prompt 调整时意外影响执行语义。
+
+### 阶段五：控制协议下沉层
+
+代表实现：
+
+- [ToolCallingLoop.runStartHooks](../src/extension/intents/node/toolCallingLoop.ts#L585)
+- [ToolCallingLoop.executeStopHook](../src/extension/intents/node/toolCallingLoop.ts#L281)
+- [ToolCallingLoop.shouldAutopilotContinue](../src/extension/intents/node/toolCallingLoop.ts#L356)
+- [SwitchAgentTool.invoke](../src/extension/tools/vscode-node/switchAgentTool.ts#L20)
+
+应该负责：
+
+1. 把 hooks、stop gate、autopilot continuation 和 handoff 组织成清晰控制协议。
+2. 在 loop 即将开始、即将停止、即将切换模式这些关键时刻改写执行状态。
+3. 把“是否继续执行”从模型的纯文本意图提升为显式运行时协议。
+
+不应该负责：
+
+1. 亲自承担业务工具执行。
+2. 回退成一个把所有策略、能力和执行细节全部吞进来的超级类。
+3. 把控制理由只留在 UI 文案里而不回写到后续可见状态。
+
+这一层是上篇和下篇之间最关键的交界面。上篇在这里先划清责任边界，下篇再继续说明这些协议在运行态到底怎样接管 loop。
+
+### 阶段六：可观测与复盘层
+
+代表实现：
+
+- [../src/platform/chat/common/sessionTranscriptService.ts](../src/platform/chat/common/sessionTranscriptService.ts)
+- [../src/platform/trajectory/node/trajectoryLoggerAdapter.ts](../src/platform/trajectory/node/trajectoryLoggerAdapter.ts)
+
+应该负责：
+
+1. 记录会话事件、工具轮次、控制理由和关键执行轨迹。
+2. 让 Agent Mode 的行为可以被回放、比较和追责。
+3. 为调试和后续调优提供稳定观察面，而不是事后靠猜测还原执行过程。
+
+不应该负责：
+
+1. 反向充当业务真相来源。
+2. 决定主执行链路的策略。
+3. 因记录失败而直接破坏主执行闭环。
+
+静态上，observability 不是执行器的一部分；但如果没有这一层，Agent Mode 对外仍然会表现得像一个难以复盘的黑盒系统。
+
+---
+
+## 17. 本篇收束：从静态架构走向运行时协议
+
+到这里，上篇真正回答完的不是“Agent 能做什么”，而是以下三类更基础的问题：
+
+1. Agent Mode 在整个 Copilot Chat 系统里的架构位置是什么。
+2. 这条执行路径与 AskAgent、Edit Mode、Copilot CLI、Claude Code 的边界差异是什么。
+3. 哪些职责属于 participant、orchestration、intent、prompt、control plane 和 observability，哪些又不应该混写。
+
+为了避免三篇文档后续继续重复同一批解释，下面用一张交接表把“哪个问题该在哪篇看”明确下来。
+
+| 如果你现在的问题是 | 本篇里的主落点 | 下篇里的接续落点 |
+| --- | --- | --- |
+| Agent Mode 在系统里到底算哪一层能力 | 第 1、3、5 节 | 第 1 节 |
+| 为什么它不是普通 AskAgent | 第 6 节 | 第 8 节 |
+| 工具、权限、hook、handoff 的静态边界怎么划 | 第 8 节 | 第 19、20 节 |
+| 哪些方法定义了静态职责骨架 | 第 9 到第 15 节 | 第 11 到第 17 节 |
+| 一次请求在运行态如何一步步推进 | 本篇只做责任划界 | 下篇第 1、18 节 |
+| 为什么它在长任务里不会立刻失忆 | 本篇第 10 到第 15 节的入口索引 | 下篇第 6、17 节 |
+| 为什么系统会“该停不停”或“继续催做” | 本篇第 8、16 节 | 下篇第 19、20 节 |
+
+如果只想用最短路径把上篇和下篇接起来，建议直接按下面顺序继续：
+
+1. 在本篇回看第 8 节，确认静态控制面是谁在负责。
+2. 然后跳到下篇第 18 节，看这些静态职责如何沿时间顺序接管执行。
+3. 最后读下篇第 19 和第 20 节，把 stop hook、autopilot 和 handoff 放回同一个运行时协议中理解。
+
+这样读，三篇文档会形成一条更清晰的闭环：导航页解决“从哪进”，上篇解决“谁负责什么”，下篇解决“这些职责如何真正跑起来”。

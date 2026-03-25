@@ -1204,6 +1204,52 @@ flowchart TD
 2. 如果 hook 没拦但仍然没停，再看是不是 `autopilot` 还没拿到 `task_complete`。
 3. 如果最终停了，要么是显式完成，要么是已经打到 `autopilot` 的硬上限。
 
+### 19.7 统一运行态控制状态机：把 block、retry、continue、handoff 放进一张图
+
+如果只分别看前面的矩阵、停止分叉图和控制面时序图，会得到三个都正确但视角不同的局部答案：
+
+1. 矩阵告诉你不同权限级别的协议差异。
+2. 停止分叉图告诉你“为什么这一次没停”。
+3. 控制面时序图告诉你“谁在什么时候改写状态”。
+
+但读源码时，最容易卡住的问题往往是另一个：**这些控制条件在运行时到底组成了什么状态机**。下面这张图专门把它收束成一条完整运行态控制链。
+
+```mermaid
+stateDiagram-v2
+    [*] --> Preflight
+    Preflight --> Blocked: UserPromptSubmit block
+    Preflight --> Running: start hooks / submit hooks allow
+
+    Running --> ToolRound: 模型返回 tool calls
+    ToolRound --> Running: 工具结果回灌
+
+    Running --> RetryGate: fetch 失败或响应异常
+    RetryGate --> Running: shouldAutoRetry() = true
+    RetryGate --> Waiting: 需要用户介入或达到重试上限
+
+    Running --> StopGate: 无更多 tool calls / 候选停止
+    StopGate --> Running: Stop/SubagentStop 阻断结束
+    StopGate --> ContinueGate: 允许结束
+
+    ContinueGate --> Running: autopilot nudge continue
+    ContinueGate --> Waiting: 普通模式确认 / yield pause / 外部暂停
+    ContinueGate --> Handoff: switch_agent
+    ContinueGate --> Done: 正常结束或 task_complete
+
+    Waiting --> Running: 用户确认继续或恢复执行
+    Handoff --> [*]
+    Blocked --> [*]
+    Done --> [*]
+```
+
+这张图里最关键的不是状态数量，而是三条最容易在脑中混掉的边界：
+
+1. `RetryGate` 处理的是失败恢复，不处理“是否算完成”。
+2. `StopGate` 处理的是外部控制层是否阻断结束。
+3. `ContinueGate` 处理的是在“允许结束之后”，是否还要因为 `autopilot` 或 handoff 协议继续改写状态。
+
+也就是说，运行态不是一个单层 loop，而是“执行面 + 多个控制门”的串联状态机。理解了这张图，再去看 [ToolCallingLoop._runLoop](../src/extension/intents/node/toolCallingLoop.ts#L782)、[shouldAutoRetry](../src/extension/intents/node/toolCallingLoop.ts#L397)、[executeStopHook](../src/extension/intents/node/toolCallingLoop.ts#L281) 和 [shouldAutopilotContinue](../src/extension/intents/node/toolCallingLoop.ts#L356)，会更容易把分散条件重新装回同一个脑图里。
+
 ---
 
 ## 20. 控制面时序图：Hooks、Autopilot 与 Handoff
@@ -1284,3 +1330,43 @@ sequenceDiagram
 原因是它和普通读文件、跑任务、改代码不同。它不是在当前 loop 内产生一个业务结果，而是在当前 chat session 上触发一次模式切换。换句话说，它改写的不是工作区状态，而是“接下来由谁接管这段对话”的控制状态。
 
 因此，把 handoff 画进控制面图，比把它画进一般工具执行图更准确。
+
+### 20.3 控制面方法与执行面方法对照表
+
+到这里，文中已经分别讲了执行主链、长上下文、stop 协议、权限矩阵和 handoff。如果继续只按时间顺序读，很容易再次把“负责推进工作的方法”和“负责改写推进协议的方法”混在一起。
+
+下面这张表专门做一件事：把常用关键方法按“主要属于执行面还是控制面”重新归类，并给出最应该联读的对象。
+
+| 侧面 | 方法 | 主要职责 | 最好联读的方法 | 为什么要联读 |
+| --- | --- | --- | --- | --- |
+| 执行面 | [runWithToolCalling](../src/extension/prompt/node/defaultIntentRequestHandler.ts#L318) | 启动 loop、接线 hooks/handlers/telemetry | [ToolCallingLoop.runStartHooks](../src/extension/intents/node/toolCallingLoop.ts#L585) | 一个负责把机器开起来，一个负责决定首轮前能不能起跑 |
+| 执行面 | [ToolCallingLoop.createPromptContext](../src/extension/intents/node/toolCallingLoop.ts#L217) | 重建当前轮上下文 | [AgentIntentInvocation.buildPrompt](../src/extension/intents/node/agentIntent.ts#L366) | 一个提供上下文快照，一个把快照变成可发送 prompt |
+| 执行面 | [DefaultToolCallingLoop.getAvailableTools](../src/extension/prompt/node/defaultIntentRequestHandler.ts#L734) | 形成当前轮可见工具集 | [getAgentTools](../src/extension/intents/node/agentIntent.ts#L67) | 前者是运行时裁剪，后者是策略层初筛 |
+| 执行面 | [DefaultToolCallingLoop.fetch](../src/extension/prompt/node/defaultIntentRequestHandler.ts#L691) | 发起真实模型请求 | [ToolCallingLoop.shouldAutoRetry](../src/extension/intents/node/toolCallingLoop.ts#L397) | 一个制造响应，一个决定失败后是否再试 |
+| 控制面 | [ToolCallingLoop.runStartHooks](../src/extension/intents/node/toolCallingLoop.ts#L585) | 首轮前注入约束与上下文 | [ChatParticipantRequestHandler.getResult](../src/extension/prompt/node/chatParticipantRequestHandler.ts#L204) | 一个管请求能否进入，另一个管进入后首轮前是否还能被拦 |
+| 控制面 | [ToolCallingLoop.executeStopHook](../src/extension/intents/node/toolCallingLoop.ts#L281) | 把候选停止改写为继续 | [ToolCallingLoop.shouldAutopilotContinue](../src/extension/intents/node/toolCallingLoop.ts#L356) | 前者是外部 stop gate，后者是 autopilot 内部完成 gate |
+| 控制面 | [ToolCallingLoop.shouldAutoRetry](../src/extension/intents/node/toolCallingLoop.ts#L397) | 决定失败恢复协议 | [ToolCallingLoop._runLoop](../src/extension/intents/node/toolCallingLoop.ts#L782) | 单独看重试条件不够，必须回到主循环里看它何时生效 |
+| 控制面 | [SwitchAgentTool.invoke](../src/extension/tools/vscode-node/switchAgentTool.ts#L20) | 改写当前会话接管者 | [ToolCallingLoop.executeStopHook](../src/extension/intents/node/toolCallingLoop.ts#L281) | 两者都不直接做业务工作，但都会改写“接下来怎么走” |
+
+如果你只想抓住 Agent Mode 最核心的工程区别，可以把这张表记成一句话：**执行面负责把任务往前做，控制面负责决定这条“往前做”的路什么时候能开始、什么时候必须继续、什么时候允许换人、什么时候才算真正结束。**
+
+### 20.4 下篇收束：从运行时协议回到读码顺序
+
+读到这里，下篇最重要的几个问题已经收束成一个完整闭环：
+
+1. 主执行链路如何启动并反复推进。
+2. 长上下文为什么不会让系统很快失忆。
+3. hooks、retry、stop、autopilot、handoff 如何共同构成控制协议。
+
+如果接下来要直接跟源码，建议不要再按全文顺序扫，而是按下面这个最短闭环重读：
+
+1. [runWithToolCalling](../src/extension/prompt/node/defaultIntentRequestHandler.ts#L318)
+2. [ToolCallingLoop.createPromptContext](../src/extension/intents/node/toolCallingLoop.ts#L217)
+3. [AgentIntentInvocation.buildPrompt](../src/extension/intents/node/agentIntent.ts#L366)
+4. [DefaultToolCallingLoop.fetch](../src/extension/prompt/node/defaultIntentRequestHandler.ts#L691)
+5. [ToolCallingLoop.shouldAutoRetry](../src/extension/intents/node/toolCallingLoop.ts#L397)
+6. [ToolCallingLoop.executeStopHook](../src/extension/intents/node/toolCallingLoop.ts#L281)
+7. [ToolCallingLoop.shouldAutopilotContinue](../src/extension/intents/node/toolCallingLoop.ts#L356)
+8. [SwitchAgentTool.invoke](../src/extension/tools/vscode-node/switchAgentTool.ts#L20)
+
+这 8 个点串起来，基本就能把“如何执行”与“如何被控制”同时装回脑子里，而不必在 loop 细节和控制细节之间反复跳失上下文。
