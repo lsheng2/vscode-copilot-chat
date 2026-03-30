@@ -1,0 +1,92 @@
+> 🚨 Note: This log may contain personal information such as the contents of your files or terminal output. Please review the contents carefully before sharing.
+# progressMessages - 75c1f73e
+
+- [Request Messages](#request-messages)
+  - [System](#system)
+  - [User](#user)
+- [Response](#response)
+
+## Metadata
+<pre><code>
+requestType      : ChatCompletions
+model            : gpt-4o-mini-2024-07-18
+maxPromptTokens  : 12285
+maxResponseTokens: 4096
+location         : 4
+otherOptions     : {"temperature":0.1,"stream":true}
+intent           : undefined
+startTime        : 2026-03-28T14:12:41.792Z
+endTime          : 2026-03-28T14:12:42.667Z
+duration         : 875ms
+ourRequestId     : 581c5d9d-cb81-4292-8b84-5aa3bf6c8c7f
+requestId        : 581c5d9d-cb81-4292-8b84-5aa3bf6c8c7f
+serverRequestId  : 581c5d9d-cb81-4292-8b84-5aa3bf6c8c7f
+timeToFirstToken : 417ms
+resolved model   : gpt-4o-mini-2024-07-18
+usage            : {"completion_tokens":75,"completion_tokens_details":{"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"prompt_tokens":253,"prompt_tokens_details":{"cached_tokens":0},"total_tokens":328,"reasoning_tokens":0}
+</code></pre>
+## Request Messages
+### System
+~~~md
+You are an expert in writing short, catchy, and encouraging progress messages for a coding assistant.
+The messages are shown to users while they wait for an AI to editing and improving existing code based on a user request.
+
+Follow Microsoft content policies.
+Avoid content that violates copyrights.
+If you are asked to generate content that is harmful, hateful, racist, sexist, lewd, or violent, only respond with "Sorry, I can't assist with that."
+Keep your answers short and impersonal.
+
+Guidelines for the messages:
+- Each message should be 2-4 words
+- Be encouraging and slightly playful
+- Reference coding/programming themes
+- Avoid technical jargon that would confuse beginners
+- Do not use emojis
+- Do not use punctuation at the end
+- Each message should be unique and different from the others
+- Return messages as a JSON array of strings, nothing else
+
+Examples of good progress messages:
+- Warming up the algorithms
+- Brewing some fresh code
+- Crafting your solution
+- Thinking through the logic
+- Almost there, hang tight
+
+~~~
+
+### User
+~~~md
+Please generate exactly 10 unique progress messages for the "edit code" scenario.
+Return only a JSON array of strings, no other text.
+~~~
+
+
+
+## Response
+### Assistant
+~~~md
+[
+    "Tuning the syntax",
+    "Polishing your code",
+    "Refining the logic",
+    "Sprucing up the script",
+    "Enhancing your functions",
+    "Optimizing the flow",
+    "Smoothing out the bugs",
+    "Elevating your code",
+    "Revamping the structure",
+    "Boosting performance now"
+]
+~~~
+
+
+<style>
+[id^="system"], [id^="user"], [id^="assistant"] {
+		margin: 4px 0 4px 0;
+}
+
+.markdown-body > pre {
+		padding: 4px 16px;
+}
+</style>

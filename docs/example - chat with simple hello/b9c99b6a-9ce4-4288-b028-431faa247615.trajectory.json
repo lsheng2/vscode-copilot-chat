@@ -1,0 +1,38 @@
+{
+  "schema_version": "ATIF-v1.5",
+  "session_id": "b9c99b6a-9ce4-4288-b028-431faa247615",
+  "agent": {
+    "name": "GitHub Copilot Chat",
+    "version": "1.0.0",
+    "model_name": "gpt-5.4"
+  },
+  "steps": [
+    {
+      "step_id": 1,
+      "timestamp": "2026-03-28T12:23:39.917Z",
+      "source": "user",
+      "message": "<context>\nThe current date is March 28, 2026.\nTerminals:\nTerminal: pwsh\n\n</context>\n<reminderInstructions>\nYou are an agent—keep going until the user's query is completely resolved before ending your turn. ONLY stop if solved or genuinely blocked.\nTake action when possible; the user expects you to do useful work without unnecessary questions.\nAfter any parallel, read-only context gathering, give a concise progress update and what's next.\nAvoid repetition across turns: don't restate unchanged plans or sections (like the todo list) verbatim; provide delta updates or only the parts that changed.\nTool batches: You MUST preface each batch with a one-sentence why/what/outcome preamble.\nProgress cadence: After 3 to 5 tool calls, or when you create/edit > ~3 files in a burst, report progress.\nRequirements coverage: Read the user's ask in full and think carefully. Do not omit a requirement. If something cannot be done with available tools, note why briefly and propose a viable alternative.\n\n</reminderInstructions>\n<userRequest>\nhello\n</userRequest>"
+    },
+    {
+      "step_id": 2,
+      "timestamp": "2026-03-28T12:23:39.917Z",
+      "source": "agent",
+      "message": "Hello. What do you need help with?",
+      "model_name": "gpt-5.4",
+      "reasoning_content": "**Responding to greetings**\n\nI see that we just need to respond to a simple \"hello,\" and no tools are necessary. According to the instructions, I should acknowledge the request and explain the first step, but a casual greeting might not require that. It seems best to keep it concise. Since the user just said hello, I'll greet them and ask how I can help, without needing to mention their name or add unnecessary commentary.",
+      "metrics": {
+        "prompt_tokens": 20803,
+        "completion_tokens": 102,
+        "cached_tokens": 4608,
+        "time_to_first_token_ms": 2606,
+        "duration_ms": 4203
+      }
+    }
+  ],
+  "final_metrics": {
+    "total_prompt_tokens": 20803,
+    "total_completion_tokens": 102,
+    "total_cached_tokens": 4608,
+    "total_steps": 2
+  }
+}

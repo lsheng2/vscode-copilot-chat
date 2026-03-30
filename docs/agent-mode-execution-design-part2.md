@@ -6,6 +6,8 @@
 
 如果将上篇理解为“系统长什么样”，那么下篇回答的是“系统如何运转”。
 
+为了避免把执行链路理解成纯概念图，本文也吸收两个已校验样本作为运行时边界：`hello` 负责说明“Agent 骨架可以在首轮直接收口”，`create-file` 负责说明“同一条骨架如何真正展开成多轮工具闭环、approval、continuation 与回退”。
+
 ---
 
 ## 1. Agent Mode 的主执行链路
@@ -193,6 +195,40 @@ Loop 会把下面这些内容放进 prompt context：
 
 工具执行结果会回灌到下一轮 prompt。该机制决定了 Agent 具备“边做边修正”的能力。
 
+### 1.4 用三个真实样本看执行谱系
+
+只看运行时图，很容易把所有 Agent 请求脑补成同一种长度的执行链。真实情况不是这样。`hello`、`create-file` 与 `database qna` 更像同一条执行谱系上的三种代表性负载：
+
+| 维度 | [`hello`](./example%20-%20chat%20with%20simple%20hello/hello-agent-panel-case-study.md) | [`create-file`](./example%20-%20create%20a%20file/create-file-agent-panel-case-study.md) | [`database qna`](./example%20-%20database%20qna/agent-mode-codebase-qa-case-study.md) | 执行层应如何解读 |
+| --- | --- | --- | --- | --- |
+| participant / intent | `editsAgent` + `Intent.Agent` | `editsAgent` + `Intent.Agent` | `editsAgent` + `Intent.Agent` | 三者入口骨架一致 |
+| 首轮模型判断 | greeting，不需要 tools | 先定位目录，再逐轮完成文件改写 | 先做宽搜，再逐轮收缩到 completion protocol / hook / compaction / observability | LLM 决定的是本轮动作，不是 loop 类绑定 |
+| 可见工具回合 | 无真实外显 tool round | 4 次工具执行 + 1 次最终自然语言回答 | 6 个研究 turn + pre-final 收束轮 | 同一条 loop 可以首轮结束，也可以扩展成编辑闭环或研究闭环 |
+| prompt 组装期副作用 | 出现 `manage_todo_list(read)` 探测 todo，但未形成 tool round | prompt plumbing 仍然存在，只是主视角已被真实工具回合覆盖 | 当前轮 `renderedUserMessage` 与历史/marker 折叠同时存在 | 不要把 prompt 装配期上下文探测误判成模型规划出的第一步 |
+| approval | 无 | `create_file`、`read_file`、`apply_patch` 共 3 次 | 无外显 approval，主成本在读码与重规划 | approval 绑定资源访问，不绑定最终回答 |
+| continuation / cache | 单轮 cache read，不存在 `previous_response_id` | 第 2 轮后可见 stateful continuation 与高比例 cache read | 有 marker / 续接链，但实际 `query` 仍是普通当前轮请求，不是 `Please continue` | `cached tokens` 和 continuation query 改写不是一回事 |
+
+所以更准确的说法是：**Agent Mode 的运行时不是固定长度的剧本，而是一套可提前收口、也可逐轮扩张成“编辑闭环”或“研究闭环”的执行协议。**
+
+### 1.5 多轮执行里的三种“复用”不要混在一起
+
+理解 `create-file` 这类真实多轮执行时，最容易把“复用”说成一个词。但运行时里至少有三种不同层面的复用：
+
+| 复用层次 | `hello` | `create-file` | 真正含义 |
+| --- | --- | --- | --- |
+| 扩展端已渲染片段复用 | 有 | 有 | 例如全局上下文、当前轮用户消息等片段在客户端侧被冻结、重用，避免每轮重新做同样的 prompt 组装劳动 |
+| provider 侧 prompt cache / cache read | 有，且只发生在单轮 | 有，且从第 2 轮开始占比极高 | 表示 provider 将稳定前缀当成可复用输入处理；这是 usage/计费和 prefill 优化层面的事 |
+| Responses API stateful continuation | 没有 | 有 | 通过 `stateful_marker -> previous_response_id` 让下一轮请求接在上一轮 provider 状态之后继续 |
+
+这三者不是同一个东西，因此也不能混着解释：
+
+1. 在 `hello` 里看到 `cached tokens`，只能说明单轮请求命中了某些稳定前缀缓存，不能据此声称已经发生 continuation。
+2. 在 `create-file` 里看到 `previous_response_id` 或 stateful marker，才可以说明这条链路进入了 provider 侧的续接协议。
+3. 即便发生了 continuation，Agent 侧语义上仍然是“每轮重建完整逻辑上下文，再让 endpoint 决定 wire-level 请求该如何裁剪”。
+4. `database qna` 还证明了另一层经常被说混的区别：进入 Responses API stateful continuation，不等于这一轮 `query` 就一定被改写成 `Please continue`。真实日志里完全可能继续保留原始 `<userRequest>`，只是 transport 层用 marker 折叠了历史前缀。
+
+还要再补一个经常被说错的细节：`previous_response_id` 失效和 prompt cache miss 不是一回事。前者会触发 endpoint 的 fallback retry，退回不用 marker 的完整语义请求；后者通常只是性能收益没拿到，不会单独导致这轮业务失败。
+
 ---
 
 ## 2. Agent 是如何自主完成复杂工作的
@@ -218,6 +254,8 @@ flowchart TD
 - 执行一步后停住
 - 执行失败后不知道如何恢复
 - 任务做了一半却误判已完成
+
+`hello` 正好也是这条结论的一个反向样本：它并没有否定闭环的重要性，而是说明闭环系统可以在第一轮判断“没有必要进入执行阶段”后直接收口。换句话说，自主性来自“系统有能力继续推进”，不来自“每次都必须把所有能力都用一遍”。
 
 ### 2.2 为什么要多轮而不是单轮
 
@@ -315,6 +353,11 @@ sequenceDiagram
 1. 先获取证据，再行动
 2. 先做最小可验证改动，再验证
 3. 验证失败时自动继续迭代
+
+但这类“跨文件修复 + 验证”的例子只覆盖了执行型复杂任务，还没有覆盖研究型复杂任务。`database qna` 样本补上了另一半现实：主代理可以长时间停留在只读研究 loop 中，通过 `Codebase` 预取、`grep_search`、`read_file` 和多轮重规划逐步锁定答案，过程中不一定真的派生 `SearchSubagent`。所以这里更准确的执行谱系应该理解成两类高负载主路并存：
+
+1. `create-file` 代表“有外部副作用的编辑/验证闭环”。
+2. `database qna` 代表“无副作用但高重规划密度的研究/检索闭环”。
 
 ---
 
@@ -466,15 +509,18 @@ Agent Mode 的可控性主要来自以下几层机制：
 
 ## 7. 可观测性微架构
 
-### 7.1 Transcript 与 Trajectory
+### 7.1 Transcript、Request Logger 与 Trajectory
 
 Session transcript 的职责是按时间顺序记录一次 Agent 会话中的关键事件，对应接口见 [../src/platform/chat/common/sessionTranscriptService.ts](../src/platform/chat/common/sessionTranscriptService.ts)。
 
 Trajectory 更偏向结构化追踪，对应实现见 [../src/platform/trajectory/node/trajectoryLoggerAdapter.ts](../src/platform/trajectory/node/trajectoryLoggerAdapter.ts)。
 
+而 `database qna` 样本说明，在复杂多轮场景里还必须把 request logger / raw request 单独拎出来，因为很多 prompt 与 transport 事实只会在那里出现：例如 `renderedUserMessage`、`toolCallRounds`、`statefulMarker`、以及 pre-final commentary round 这种比 trajectory 更细的序列化粒度。
+
 可以把二者关系理解为：
 
 - Transcript = 日志本
+- Request Logger = 原始证据仓
 - Trajectory = 战术地图
 
 ### 7.2 可观测性视图
@@ -489,6 +535,17 @@ flowchart LR
     Telemetry --> Debug
     Trajectory --> Debug
 ```
+
+### 7.3 一条最短排障链：先看 discovery，再看 raw request，再看 trajectory
+
+把 `hello` 的最小样本和 `create-file` 的多轮样本合起来，可以压出一条很稳定的排障顺序：
+
+1. 先看 debug/discovery 面，确认 instructions、hooks、agents、skills、todo probe、approval 等外围事件有没有跑偏。
+2. 再看 raw request 或 chatreplay，确认真正送给模型的 `messages`、tool declarations、resolved model、usage 以及 request location。
+3. 然后看 trajectory，确认系统最终把这次请求压成了怎样的结构化步骤，以及有没有真正形成 tool round / subagent round。
+4. 如果前三层仍不能解释问题，再向外补 transcript 与 OTel，分别看 turn 顺序和时序开销。
+
+这条顺序的价值在于，它能先把“路由错了、prompt 组装错了、trajectory 被语义压缩了但 raw request 其实有更多 transport 细节”这三类最常见问题分开，而不是一上来就陷进全量日志。`database qna` 里的 turn 对齐、pre-final commentary round、以及 `renderedUserMessage` / marker 链，都是只有 request logger 才看得最清楚的例子。
 
 ---
 
@@ -1324,6 +1381,14 @@ stateDiagram-v2
 
 这一步仍然没有调用模型。它做的是把“散落在 request、conversation、hook、tools 里的信息”整理成一个稳定的 `IBuildPromptContext`。
 
+这里最好再把三条容易混淆的 query 分支说死：
+
+1. 普通多轮场景里，`query` 仍然就是当前 turn 的原始用户请求。
+2. 只有 continuation 类 request 被代码显式标记时，才会改写成 `Please continue`。
+3. 只有 stop hook 阻止收尾并写入 `stopHookReason` 时，才会改写成 hook reason。
+
+`create-file` 与 `database qna` 合在一起给了一个很重要的校准：前者证明 wire-level 的 stateful continuation 确实会发生，后者又证明“发生 continuation”并不自动等于“当前轮 query 已被改写成 `Please continue`”。
+
 ### 20.4 阶段 2：`buildPrompt()` 决定这轮 prompt 用哪套模板、要不要先压缩历史
 
 [AgentIntentInvocation.buildPrompt()](../src/extension/intents/node/agentIntent.ts#L366) 做的不是简单 render，它其实承担了 prompt 级策略层。
@@ -1406,6 +1471,8 @@ stateDiagram-v2
 而 `UserQuery` 自身也不是简单回显原文，见 [UserQuery](../src/extension/prompts/node/panel/chatVariables.tsx#L90)。如果用户输入的是 prompt file slash command，它会先转成 `Follow instructions in #...` 这样的文本，再进入最终 prompt。
 
 这解释了一个常见误解：Agent Mode 里的“用户消息”其实已经是二次加工过的结构化消息，不等于 UI 输入框里那一行原文。
+
+`hello` 样本还提供了一个特别容易被误判的例子：debug 面板里出现的 `manage_todo_list(read)`，更接近 `AgentUserMessage` / todo context 组装阶段触发的上下文探测，而不是模型已经在第一轮正式规划出了一次独立工具调用。也就是说，看到某个 read 类动作出现在 discovery/debug 面，不应该立刻把它当成 trajectory 里的第一步自治执行。
 
 #### E. 自定义 instructions 块
 
@@ -1683,6 +1750,411 @@ VSC 内部模型分支见 [VSCModelPromptResolverA](../src/extension/prompts/nod
 
 > Agent Mode 的模型适配不是“换一个 system prompt 文件”这么简单，而是通过 `PromptRegistry` 先解析一整组可覆盖槽位，再把 system prompt、reminder、identity、安全规则、tool hint，甚至 user query tag 名一起装配进最终 prompt。
 
+---
+
+## 22. 把第 20 节和第 21 节压成一张二维总表
+
+如果把第 20 节回答的“prompt 在运行时按什么阶段组织”，和第 21 节回答的“模型家族在哪些槽位覆盖 prompt”叠到一起，可以得到一张更适合横向对比的二维表。
+
+这张表只回答一个问题：
+
+> 在不同运行阶段里，哪些东西是所有模型共享的，哪些东西会被模型家族 customization 改写。
+
+### 22.1 阶段 × 定制点总表
+
+| 运行阶段 | 共享主干 | 可能被模型家族改写的点 | 典型证据 |
+| --- | --- | --- | --- |
+| 会话前置控制 | `runStartHooks()`、transcript、continuation、stop-hook reason 收集 | 基本不按模型族分流 | [ToolCallingLoop.runStartHooks()](../src/extension/intents/node/toolCallingLoop.ts#L585) |
+| 本轮上下文快照 | `createPromptContext()` 统一组装 `query/history/chatVariables/tools/modeInstructions` | 基本不按模型族分流 | [ToolCallingLoop.createPromptContext()](../src/extension/intents/node/toolCallingLoop.ts#L217) |
+| Prompt 策略编排 | `AgentIntentInvocation.buildPrompt()` 统一处理 references、budget、summary、background compaction | 会在这里解析不同模型族的 `AgentPromptCustomizations` | [AgentIntentInvocation.buildPrompt()](../src/extension/intents/node/agentIntent.ts#L366) 、[PromptRegistry.resolveAllCustomizations()](../src/extension/prompts/node/agent/promptRegistry.ts#L77) |
+| System prompt 渲染 | 都通过 `AgentPrompt` 进入 render 主链 | `SystemPrompt` 类、`CopilotIdentityRules`、`SafetyRules` 可替换 | [AgentPrompt](../src/extension/prompts/node/agent/agentPrompt.tsx#L83) |
+| Reminder / hint 渲染 | 都会有 reminder 和 user-message 附近的约束块 | `ReminderInstructions`、`ToolReferencesHint`、`userQueryTagName` 可替换 | [AgentPrompt.getAgentCustomInstructions()](../src/extension/prompts/node/agent/agentPrompt.tsx#L182) 、[AgentUserMessage](../src/extension/prompts/node/agent/agentPrompt.tsx#L341) |
+| 历史与附件渲染 | 历史、tool transcript、chat variables 的 render 机制共享 | 一般不按模型族单独分叉，但会受 `SystemPrompt`/Reminder 风格影响 | [AgentConversationHistory](../src/extension/prompts/node/agent/agentConversationHistory.tsx#L46) |
+| 请求封装 | `fetch()` 统一调用 `makeChatRequest2(...)`，注入 `messages`、tools schema、telemetry | 主要不是 prompt customization，而是 provider 适配差异 | [DefaultToolCallingLoop.fetch()](../src/extension/prompt/node/defaultIntentRequestHandler.ts#L691) |
+| Tool schema 归一化 | 所有 provider 上游都先吃 `normalizeToolSchema(...)` 的统一输出 | 会按模型 family 做 schema 兼容修剪 | [normalizeToolSchema()](../src/extension/tools/common/toolSchemaNormalizer.ts#L16) |
+| Provider 最终翻译 | 都以 `requestOptions.tools` 为统一中间层 | Anthropic / Gemini / OpenAI family 各自翻译成不同协议 | [anthropicProvider.ts](../src/extension/byok/vscode-node/anthropicProvider.ts#L165) 、[geminiNativeProvider.ts](../src/extension/byok/vscode-node/geminiNativeProvider.ts#L121) |
+
+这张表背后的核心判断是：
+
+1. **第 20 节主要讲的是共享执行骨架。**
+2. **第 21 节主要讲的是哪些 prompt 槽位能被模型族替换。**
+3. **真正 provider 级的差异，大多不发生在 `AgentPrompt`，而发生在 `normalizeToolSchema()` 之后。**
+
+### 22.2 哪些阶段最像“模板差异”，哪些阶段最像“协议差异”
+
+如果进一步粗分，可以把二维表再压成两大片。
+
+| 大类 | 对应阶段 | 主要问题 |
+| --- | --- | --- |
+| 模板/提示词差异 | 第 20 节的阶段 2、3，以及第 21 节的 customization 槽位 | “模型看到什么指令文本、提醒语、tag 结构” |
+| 协议/传输差异 | 第 20 节的阶段 4，以及本节后面第 23 节 | “模型收到什么 tools schema，schema 以什么 provider 协议传输” |
+
+所以如果只说“不同模型家族会切 prompt”，这句话只覆盖了一半。另一半其实是：
+
+> 模型家族不只切文本提示词，还会切 tool schema 可接受的协议边界。
+
+### 22.3 一个最实用的阅读顺序
+
+如果你以后要重新读这块代码，最省力的顺序通常是：
+
+1. 先看 [AgentIntentInvocation.buildPrompt()](../src/extension/intents/node/agentIntent.ts#L366)，确认共享阶段骨架。
+2. 再看 [PromptRegistry.resolveAllCustomizations()](../src/extension/prompts/node/agent/promptRegistry.ts#L77)，确认模型族能改哪些 prompt 槽位。
+3. 然后看 [DefaultToolCallingLoop.fetch()](../src/extension/prompt/node/defaultIntentRequestHandler.ts#L691)，确认 prompt 如何变成真实请求。
+4. 最后再看 [normalizeToolSchema()](../src/extension/tools/common/toolSchemaNormalizer.ts#L16) 与各 provider adapter，确认 provider 协议差异。
+
+这样读的好处是：不会把“提示词模板差异”和“工具协议差异”混成一件事。
+
+---
+
+## 23. Tool schema normalization 在不同 provider 下如何变化
+
+前面已经多次提到：主 Agent 在真正发请求前，不会把原始 `LanguageModelToolInformation` 直接扔给模型，而是会先进入一层统一的 schema 归一化，再进入 provider 特定协议。
+
+这一节回答三个问题：
+
+1. `normalizeToolSchema()` 到底在修什么。
+2. 为什么不同 provider 还要再做一层翻译。
+3. OpenAI / Anthropic / Gemini 的差异具体落在哪。
+
+### 23.1 先给结论：这里其实有三层格式
+
+从主 Agent 到模型端，工具 schema 至少经过三层：
+
+| 层级 | 形态 | 作用 |
+| --- | --- | --- |
+| 运行时工具信息层 | `LanguageModelToolInformation` | VS Code / Copilot 统一的工具元数据表示 |
+| 统一函数工具层 | `OpenAiFunctionTool[]` 风格的 `type=function/function.parameters` | 作为 Copilot 内部发送前的统一中间层 |
+| Provider 传输层 | Anthropic `input_schema`、Gemini `functionDeclarations`、OpenAI function tools | 真正发给具体模型后端的协议 |
+
+所以 `normalizeToolSchema()` 并不是 provider 最终协议本身，而是“provider 之前的一层统一清洗器”。
+
+### 23.2 `normalizeToolSchema()` 的职责不是增强语义，而是规避 provider 限制
+
+[normalizeToolSchema()](../src/extension/tools/common/toolSchemaNormalizer.ts#L16) 的注释已经说得很直白：它存在的主要目的，是避免某些模型族因为 schema 不兼容而直接返回空洞的 400 错误。
+
+也就是说，这一层不是在“让 schema 更强”，而是在“把 schema 修到各 provider 至少能吃下去”。
+
+它主要做了几类事。
+
+#### A. 统一基础形状
+
+这部分对所有模型族都适用：
+
+1. 如果 `parameters` 不是 object，就强制改成 object。
+2. 如果 `properties` 缺失，就补空对象。
+3. 如果 `description` 为空，就补默认 description。
+4. 用 AJV 检查 schema 是否符合 JSON Schema 基本约束。
+5. array 如果没有 `items`，直接报错。
+6. `required` 里引用了不存在的属性，会被清掉。
+
+这些规则的核心目的是：避免 provider 在收到明显损坏的 schema 时直接炸掉。
+
+#### B. 清理通用不支持的组合关键字
+
+有一类关键字，即使不是某个 provider 专有问题，也会被统一去掉，尤其是顶层组合逻辑：
+
+1. `oneOf`
+2. `anyOf`
+3. `allOf`
+4. `not`
+5. `if`
+6. `then`
+7. `else`
+
+这意味着系统在统一层就已经假设：复杂组合 schema 跨 provider 稳定性差，因此宁可牺牲一部分精确表达，也优先保活调用链。
+
+#### C. 按模型族做差异化修剪
+
+这是最重要的一层。
+
+### 23.3 GPT-4-ish / OpenAI 路线：主要问题是“不支持太多 schema 关键字”
+
+在 [toolSchemaNormalizer.ts](../src/extension/tools/common/toolSchemaNormalizer.ts#L91) 往后，`isGpt4ish(family)` 会触发一组针对 GPT-4 家族的修正规则。
+
+最典型的两类限制是：
+
+1. 长 description 会被截断到 `1024` 字符。
+2. 一长串 JSON Schema 关键字会被直接删掉。
+
+被视为不稳定或不支持的关键词包括：
+
+1. `minLength` / `maxLength`
+2. `pattern`
+3. `default`
+4. `format`
+5. `minimum` / `maximum` / `multipleOf`
+6. `patternProperties`
+7. `unevaluatedProperties`
+8. `propertyNames`
+9. `minProperties` / `maxProperties`
+10. `unevaluatedItems`
+11. `contains` / `minContains` / `maxContains`
+12. `minItems` / `maxItems` / `uniqueItems`
+
+所以 OpenAI/GPT 路线的特点是：
+
+> 上游 schema 可以写得很丰富，但到了统一清洗层，很多约束会被主动降级掉，只保留更保守的 object/property/required 主干。
+
+这也是为什么文档里更适合把 OpenAI 路线描述成“弱化复杂 schema，保留最核心函数签名”。
+
+### 23.4 Draft 2020-12 路线：GPT-4 / Claude / o4 会吃另一套数组兼容规则
+
+[toolSchemaNormalizer.ts](../src/extension/tools/common/toolSchemaNormalizer.ts#L151) 里还有一条以 `isDraft2020_12Schema(family)` 为条件的规则。
+
+这条规则处理的是：
+
+1. 如果 array schema 的 `items` 是数组形式。
+2. 就把它改写成 `{ anyOf: [...] }`。
+
+当前被视为这一路线的 family 包括：
+
+1. `gpt-4*`
+2. `claude-*`
+3. `o4*`
+
+这说明系统内部已经默认认为：这些模型更接近 Draft 2020-12 语义，而不是老的 Draft 7 数组 tuple 语义。
+
+### 23.5 Gemini 路线：最典型的问题是 nullable 类型表达方式不同
+
+Gemini 的特殊逻辑在 [toolSchemaNormalizer.ts](../src/extension/tools/common/toolSchemaNormalizer.ts#L164) 以后最明显。
+
+它专门处理 `type: ['string', 'null']` 这类 union nullable 写法。
+
+规则是：
+
+1. 如果只有一个非 null 类型，例如 `['string', 'null']`，就改写成：
+    - `type: 'string'`
+    - `nullable: true`
+2. 如果是多个非 null 类型再加 `null`，例如 `['string', 'number', 'null']`，就直接去掉 `null`，保留非 null union。
+
+源码注释已经明确说明第二种是有语义损失的：字段会从“nullable”变成“non-nullable”，但这仍然比 provider 直接 400 要好。
+
+所以 Gemini 路线最值得记住的一句话是：
+
+> Gemini 更偏 OpenAPI nullable 语义，而不是 JSON Schema 的 `type: [T, 'null']` 联合写法。
+
+### 23.6 进入 provider 后，Anthropic 不是直接吃 OpenAI function tool
+
+虽然主链上很多地方把 tools 构造成 `OpenAiFunctionTool[]` 风格，但到了 Anthropic provider，最终仍然会被翻译成 Anthropic 自己的协议。
+
+在 [anthropicProvider.ts](../src/extension/byok/vscode-node/anthropicProvider.ts#L165) 这一段里，可以看到它会把每个工具变成：
+
+1. `name`
+2. `description`
+3. `input_schema`
+
+如果原工具没有 `inputSchema`，Anthropic provider 还会主动补：
+
+1. `type: 'object'`
+2. `properties: {}`
+3. `required: []`
+
+另外，Anthropic 路线还有两类 provider 级扩展，不是统一 normalizer 能表达的：
+
+1. `defer_loading`，用于 tool search / deferred tools
+2. 原生 Anthropic tool 类型，例如 `memory_20250818`、`web_search_20250305`
+
+所以 Anthropic 路线的真实形态不是“单纯把 OpenAI function tool 原样转发”，而是：
+
+1. 先吃统一清洗后的 schema。
+2. 再翻译成 `input_schema`。
+3. 再叠加 Anthropic 自己的 beta/native tool 语义。
+
+### 23.7 Gemini provider 不是 `input_schema`，而是 `functionDeclarations`
+
+Gemini 这边在 [geminiNativeProvider.ts](../src/extension/byok/vscode-node/geminiNativeProvider.ts#L121) 以后也非常清楚。
+
+它会把 tools 组装成：
+
+1. `Tool[]`
+2. 每个 `Tool` 里是一组 `functionDeclarations`
+
+如果某个工具没有 `inputSchema`，它也会补默认 object schema；如果有 schema，则进一步走 `toGeminiFunctionDeclaration(...)` 做专门转换。
+
+因此 Gemini 路线的层次是：
+
+1. 上游先统一成 `options.tools`。
+2. provider 内再调用 `toGeminiFunctionDeclaration(...)`。
+3. 最终放进 `config.tools[].functionDeclarations`。
+
+这和 Anthropic 的 `input_schema` 已经是完全不同的最终协议形态。
+
+### 23.8 OpenAI / VS Code LM access 路线：更接近统一函数工具中间层
+
+从 [languageModelAccess.ts](../src/extension/conversation/vscode-node/languageModelAccess.ts#L605) 一带可以看到，OpenAI/VS Code 侧总体上更接近把 tools 保留在统一函数工具层：
+
+1. 继续以 `requestOptions.tools` 形式向下传。
+2. 再由 endpoint / provider 具体实现去消费。
+
+也就是说，相比 Anthropic 和 Gemini 那种“在 provider 文件里能明显看到最终协议结构”，OpenAI 路线很多时候更像继续沿用统一的 function-tool 中间表示。
+
+因此如果要对比三家，可以简单写成：
+
+| 路线 | 最终显式协议形态 |
+| --- | --- |
+| OpenAI / 通用 function-tool 路线 | 继续保留 `type=function/function.parameters` 风格 |
+| Anthropic | `input_schema` |
+| Gemini | `functionDeclarations` |
+
+### 23.9 一个总表：同一把工具 schema 经过不同 provider 后会发生什么
+
+| 阶段 | OpenAI / 通用函数工具 | Anthropic | Gemini |
+| --- | --- | --- | --- |
+| 统一清洗前 | 来自 `LanguageModelToolInformation.inputSchema` | 同 | 同 |
+| 统一清洗层 | 去掉复杂组合关键词，GPT-4-ish 会删更多 schema 关键字 | 也吃统一清洗结果 | 也吃统一清洗结果，且 nullable 会改写 |
+| provider 翻译层 | 大体继续保留 `function.parameters` 中间层 | 转成 `input_schema` | 转成 `functionDeclarations` |
+| provider 附加语义 | 相对少 | 可加入 `defer_loading`、native tool types、beta features | 走 Gemini 特定 declaration converter |
+| 典型风险 | schema 约束被弱化 | native/beta tool 语义与普通 function tool 混用 | nullable / union 类型最容易出兼容问题 |
+
+### 23.10 为什么这一层必须单独讲，而不能只归到“prompt 构造”
+
+原因很简单：它解决的根本不是提示词文本，而是协议兼容。
+
+如果把它混在 prompt 章节里，会产生两个错觉：
+
+1. 以为 tools schema 只是 prompt 的附属文本。
+2. 以为不同 provider 的差异主要体现在 system prompt 文案。
+
+但从源码看，真实情况恰好相反：
+
+1. `PromptRegistry` 解决的是“文本/组件级别的模型适配”。
+2. `normalizeToolSchema()` + provider adapter 解决的是“协议/传输级别的模型适配”。
+
+两者同样重要，但不是同一层问题。
+
+### 23.11 一句话总结
+
+> Tool schema 在主 Agent 链路里会先经过统一清洗，再分别翻译成 Anthropic 的 `input_schema`、Gemini 的 `functionDeclarations` 或 OpenAI 风格的 function tool；所以不同模型族不只切 prompt 文本，也切工具协议边界。
+
+---
+
+## 24. Tool schema 从 `LanguageModelToolInformation` 到 provider payload 的完整调用链时序图
+
+前一节已经把概念拆开了，但如果还想真正把这层记牢，最有效的方式还是看一张完整时序图。
+
+这一节只回答一个问题：
+
+> 一把工具从 `LanguageModelToolInformation` 开始，到最后变成 Anthropic / Gemini / OpenAI provider 真正收到的 payload，中间到底经过了哪些组件。
+
+### 24.1 总时序图
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant Invocation as AgentIntentInvocation
+    participant Loop as DefaultToolCallingLoop
+    participant Fetch as fetch()
+    participant Normalizer as normalizeToolSchema()
+    participant Endpoint as endpoint.makeChatRequest2()
+    participant Provider as Provider Adapter
+    participant Model as Remote Model API
+
+    User->>Invocation: 发起本轮 Agent 请求
+    Invocation->>Invocation: getAvailableTools()
+    Invocation-->>Loop: LanguageModelToolInformation[]
+
+    Loop->>Invocation: buildPrompt(promptContext)
+    Invocation-->>Loop: messages + requestOptions.tools(OpenAiFunctionTool[])
+
+    Loop->>Fetch: fetch(opts)
+    Fetch->>Normalizer: normalizeToolSchema(family, opts.requestOptions.tools)
+    Normalizer-->>Fetch: 兼容化后的 function-tool schema
+
+    Fetch->>Endpoint: makeChatRequest2({ messages, requestOptions.tools, ... })
+
+    alt OpenAI / 通用 function-tool 路线
+        Endpoint->>Provider: 保持 function.parameters 风格
+        Provider->>Model: OpenAI-style function tools payload
+    else Anthropic 路线
+        Endpoint->>Provider: function-tool 中间层
+        Provider->>Provider: 转成 name/description/input_schema
+        Provider->>Model: Anthropic tools + input_schema
+    else Gemini 路线
+        Endpoint->>Provider: function-tool 中间层
+        Provider->>Provider: toGeminiFunctionDeclaration()
+        Provider->>Model: config.tools[].functionDeclarations
+    end
+
+    Model-->>Provider: tool calls / text / usage
+    Provider-->>Endpoint: ChatResponse
+    Endpoint-->>Loop: ChatResponse
+```
+
+这张图里最关键的是两点：
+
+1. `normalizeToolSchema()` 发生在 provider 之前。
+2. provider 最终协议翻译发生在 endpoint / provider 这一层，而不是发生在 prompt render 层。
+
+### 24.2 每一跳在代码里分别对应哪里
+
+如果把上面的时序图压成代码入口表，可以对应成下面这样。
+
+| 时序步骤 | 代码入口 | 作用 |
+| --- | --- | --- |
+| 生成当前轮工具集合 | [AgentIntentInvocation.getAvailableTools()](../src/extension/intents/node/agentIntent.ts#L362) | 从 `LanguageModelToolInformation[]` 这一层开始 |
+| 把工具放进本轮请求 | [DefaultToolCallingLoop.buildPrompt()](../src/extension/prompt/node/defaultIntentRequestHandler.ts#L683) | 生成 `messages` 和上游 `requestOptions.tools` |
+| 发起 fetch 前统一清洗 schema | [DefaultToolCallingLoop.fetch()](../src/extension/prompt/node/defaultIntentRequestHandler.ts#L691) | 调用 `normalizeToolSchema(...)` |
+| 统一 schema 清洗器 | [normalizeToolSchema()](../src/extension/tools/common/toolSchemaNormalizer.ts#L16) | 做 provider 兼容修剪 |
+| 统一进入 endpoint | [endpoint.makeChatRequest2()](../src/extension/prompt/node/defaultIntentRequestHandler.ts#L699) | 把 `messages + tools + telemetry` 送进 endpoint |
+| Anthropic provider 翻译 | [anthropicProvider.ts](../src/extension/byok/vscode-node/anthropicProvider.ts#L165) | 转成 `input_schema` |
+| Gemini provider 翻译 | [geminiNativeProvider.ts](../src/extension/byok/vscode-node/geminiNativeProvider.ts#L121) | 转成 `functionDeclarations` |
+| Gemini declaration converter | [toGeminiFunction()](../src/extension/byok/common/geminiFunctionDeclarationConverter.ts#L37) | 把 JSON schema 转成 Gemini 函数声明 |
+| OpenAI endpoint 入口 | [OpenAIEndpoint.makeChatRequest2()](../src/extension/byok/node/openAIEndpoint.ts#L321) | 继续走统一 function-tool 路线 |
+
+### 24.3 真正的边界在哪里
+
+把这一节和上一节合起来看，最重要的其实不是“哪行代码调了哪行代码”，而是边界划分：
+
+#### A. `LanguageModelToolInformation` 是运行时工具发现层
+
+这一层回答的是：
+
+1. 这轮有哪些工具可见。
+2. 工具的原始名字、描述、输入 schema 是什么。
+
+它还没有进入 provider 协议，也还没有 provider 特定约束。
+
+#### B. `OpenAiFunctionTool[]` 是 Copilot 内部统一中间层
+
+这一层回答的是：
+
+1. 如何把不同来源的工具统一成 function tool 结构。
+2. 如何在真正发请求前，先做一轮 provider 无关的 schema 清洗。
+
+这是主 Agent 链路里最关键的“协议中间层”。
+
+#### C. Provider payload 才是最终传输层
+
+这一层回答的是：
+
+1. Anthropic 最终收的是什么字段。
+2. Gemini 最终收的是什么字段。
+3. OpenAI 路线是否继续保留 function tool 结构。
+
+所以如果以后再看这块代码，最容易混淆的错觉要主动避免：
+
+1. `LanguageModelToolInformation` 不是最终 provider payload。
+2. `normalizeToolSchema()` 不是最终 provider adapter。
+3. `AgentPrompt` 也不负责 provider 级 schema 翻译。
+
+### 24.4 Anthropic 和 Gemini 在图里的最大差别
+
+虽然两条线都要先经过统一 normalizer，但它们最后真正分叉的地方并不一样。
+
+| 路线 | 最终分叉点 | 最值得记住的差异 |
+| --- | --- | --- |
+| Anthropic | provider 内部把函数工具转成 `input_schema` | 还能叠加 `defer_loading`、native tool types、beta features |
+| Gemini | provider 内部调用 `toGeminiFunctionDeclaration()` | 最终走 `functionDeclarations`，nullable 兼容最敏感 |
+| OpenAI / 通用路线 | endpoint 继续沿用 function-tool 中间层 | 整体离统一中间层最近 |
+
+### 24.5 如果你只想记一条最短链路
+
+可以把整条调用链压缩成下面这一行：
+
+> `LanguageModelToolInformation` -> `OpenAiFunctionTool[]` -> `normalizeToolSchema()` -> `makeChatRequest2()` -> provider 特定协议 (`input_schema` / `functionDeclarations` / function tool)
+
+这就是 tool schema 从 Agent 主链进入不同 provider 的最短闭环。
+
 1. 普通模式最容易落入 `Waiting`，因为它默认需要更多显式确认。
 2. `autoApprove` 的核心体验差异是中间多了一段 `Retrying`，很多错误会被系统先内部消化。
 3. `autopilot` 的核心体验差异是多了一段 `Continuing`，也就是系统认为“还不算真完成”，所以继续推进而不是直接收尾。
@@ -1882,3 +2354,230 @@ sequenceDiagram
 8. [SwitchAgentTool.invoke](../src/extension/tools/vscode-node/switchAgentTool.ts#L20)
 
 这 8 个点串起来，基本就能把“如何执行”与“如何被控制”同时装回脑子里，而不必在 loop 细节和控制细节之间反复跳失上下文。
+
+---
+
+## 25. Tool schema 归一化前后对照图：同一把工具在链路里到底变了什么
+
+第 23、24 节已经把“谁负责清洗 schema”和“谁负责做 provider 翻译”拆开了，但第一次读源码时，脑中仍然很容易混成一句模糊的话：
+
+> 工具 schema 会被处理一下，然后送给不同模型。
+
+这句话方向没错，但粒度太粗。真正值得记住的是：**同一把工具在链路里至少会经历三种形态**，而且每种形态回答的问题都不一样。
+
+### 25.1 先看一张前后对照图
+
+```mermaid
+flowchart LR
+        A["原始工具定义<br/>LanguageModelToolInformation<br/>name / description / inputSchema"] --> B["统一中间层<br/>OpenAiFunctionTool[]<br/>function.name / function.description / function.parameters"]
+        B --> C["统一兼容清洗<br/>normalizeToolSchema()<br/>删不兼容关键字 / 修数组 / 改 nullable"]
+        C --> D{"provider 翻译层"}
+
+        D --> E["OpenAI / 通用函数工具<br/>继续保留 function.parameters"]
+        D --> F["Anthropic<br/>name + description + input_schema"]
+        D --> G["Gemini<br/>config.tools[].functionDeclarations"]
+```
+
+这张图最重要的不是箭头数量，而是中间那两个边界：
+
+1. `LanguageModelToolInformation` 还只是“运行时发现到的工具定义”。
+2. `OpenAiFunctionTool[]` 才是主 Agent 链路内部真正稳定的协议中间层。
+3. `normalizeToolSchema()` 改的是兼容性，不改工具语义。
+4. provider 翻译层才决定最终 wire format 是 `input_schema`、`functionDeclarations` 还是继续保留 function tool。
+
+### 25.2 把“前”和“后”压成一张对照表
+
+下面这张表专门回答：同一把工具在每一层“长什么样”。
+
+| 层级 | 典型结构 | 这一层主要解决什么问题 | 典型代码入口 |
+| --- | --- | --- | --- |
+| 原始运行时工具层 | `LanguageModelToolInformation` | 当前轮有哪些工具可见 | [agentIntent.ts](../src/extension/intents/node/agentIntent.ts) |
+| 统一函数工具层 | `OpenAiFunctionTool[]` | 把不同来源工具统一成一套内部函数调用协议 | [defaultIntentRequestHandler.ts](../src/extension/prompt/node/defaultIntentRequestHandler.ts) |
+| 统一兼容清洗层 | 仍是 function-tool 结构，但 `parameters` 已被裁剪 | 去掉 provider 不兼容 schema 写法 | [toolSchemaNormalizer.ts](../src/extension/tools/common/toolSchemaNormalizer.ts) |
+| Anthropic 最终传输层 | `name` / `description` / `input_schema` | 适配 Anthropic tools 协议 | [anthropicProvider.ts](../src/extension/byok/vscode-node/anthropicProvider.ts) |
+| Gemini 最终传输层 | `functionDeclarations` | 适配 Gemini 函数声明协议 | [geminiNativeProvider.ts](../src/extension/byok/vscode-node/geminiNativeProvider.ts) |
+| OpenAI / 通用最终传输层 | `function.parameters` | 基本保持统一中间层结构 | [openAIEndpoint.ts](../src/extension/byok/node/openAIEndpoint.ts) |
+
+### 25.3 用一个最小例子看“改动发生在哪一层”
+
+假设有一把原始工具，其概念形式大致如下：
+
+```text
+name = read_file
+description = Read the contents of a file
+inputSchema = {
+    type: object,
+    properties: {
+        path: { type: string },
+        lineRange: {
+            type: ["array", "null"],
+            items: { type: integer }
+        }
+    },
+    required: ["path"]
+}
+```
+
+这把工具在不同层里会发生三类典型变化：
+
+1. 进入统一函数工具层后，主要是字段壳子变了，`inputSchema` 会被放进 `function.parameters`。
+2. 进入 `normalizeToolSchema()` 后，若当前模型族不接受某些 schema 关键字，或者对数组/nullable 的表达更严格，`parameters` 会被裁剪或改写。
+3. 真正进入 provider 时，Anthropic 会把它变成 `input_schema`，Gemini 会继续转换成 `FunctionDeclaration.parameters`。
+
+换句话说，这不是“一次转换”，而是“结构统一一次、兼容修剪一次、provider 落地一次”。
+
+### 25.4 哪些字段最容易在归一化前后发生变化
+
+如果你想快速判断某个 schema 问题大概率出在哪层，最值得盯的就是下面这几类字段。
+
+| 字段 / 语义 | 归一化前后最常见变化 | 变化原因 |
+| --- | --- | --- |
+| `type: ["x", "null"]` | Gemini 路线会改写成其可接受的 nullable 表达 | Gemini 对 nullable 表达更敏感 |
+| `prefixItems` / Draft 2020-12 数组写法 | 会被重写为兼容的数组 schema 形式 | 部分模型族对数组 schema 版本支持不一致 |
+| `allOf` / `anyOf` / `oneOf` / `not` | GPT-4-ish 路线可能被移除或弱化 | provider/function-calling 实现对组合关键字支持有限 |
+| 缺省 `description` | normalizer 会尽量补默认值 | provider 侧通常更依赖字段描述 |
+| `required` 与 `properties` 不匹配 | 会被清理 | 防止产生无效 schema |
+
+### 25.5 这一节和第 24 节的关系
+
+如果说第 24 节回答的是“这些组件按什么顺序跑”，那这一节回答的就是“跑完以后，schema 的外形具体怎么变”。
+
+所以两节最好一起记：
+
+1. 第 24 节负责时间顺序。
+2. 第 25 节负责结构形态。
+
+把两节叠在一起之后，就不容易再把 prompt customization、schema normalization 和 provider payload translation 混成一层。
+
+---
+
+## 26. Tool grouping / virtual tools 如何影响最终暴露给模型的工具集
+
+前面几节讨论的都是“单把工具如何进入 provider”。但在真实运行时，模型往往并不会直接看到全部真实工具。只要工具太多，系统就会先做一层 **tool grouping**，把多个真实工具折叠成一个 virtual tool，再把这个折叠后的工具集暴露给模型。
+
+这也是为什么只看 `getAgentTools()` 还不够。`getAgentTools()` 更像策略层初筛，而 `ToolGrouping.compute()` 才决定本轮真正发给模型的可见工具集合。
+
+### 26.1 先给结论：virtual tool 是“暴露层代理”，不是最终真实工具
+
+从 [virtualTool.ts](../src/extension/tools/common/virtualTools/virtualTool.ts) 可以直接看出，`VirtualTool.tools()` 在 group 未展开时，返回的不是组内真实工具列表，而是一个假的、可被模型调用的占位工具：
+
+1. 名字是 `activate_` 前缀开头的 virtual tool 名。
+2. 描述是该组的摘要描述。
+3. `inputSchema` 可以是空的。
+
+也就是说，在模型视角里，它先看到的是“激活某类工具”的代理入口，而不是这类工具里的每一把真实工具。
+
+### 26.2 总时序图：从真实工具到 virtual tool，再回到真实工具
+
+```mermaid
+sequenceDiagram
+        participant Invocation as AgentIntentInvocation
+        participant Loop as DefaultToolCallingLoop
+        participant Grouping as ToolGrouping
+        participant Grouper as VirtualToolGrouper
+        participant VT as VirtualTool
+        participant Model as LLM
+
+        Invocation->>Loop: getAvailableTools()
+        Loop->>Grouping: create(...) / reuse existing grouping
+        Grouping->>Grouper: addGroups(query, root, tools)
+        Grouper-->>Grouping: root.contents = 真实工具 + virtual tools
+        Grouping->>VT: root.tools()
+        alt group 尚未展开
+                VT-->>Grouping: 返回 activate_* 代理工具
+        else group 已展开
+                VT-->>Grouping: 返回组内真实工具
+        end
+        Grouping-->>Loop: 当前轮可见工具集
+        Loop->>Model: fetch(prompt, visible tools)
+
+        alt 模型调用 activate_* virtual tool
+                Model-->>Loop: toolCall(name = activate_group)
+                Loop->>Grouping: didCall(turnNo, toolCallName)
+                Grouping->>VT: isExpanded = true
+                Grouping-->>Loop: ToolResult("Tools activated: ...")
+                Loop->>Grouping: 下一轮 compute(query)
+                Grouping->>VT: root.tools()
+                VT-->>Loop: 返回组内真实工具
+        else 模型直接调用已暴露的真实工具
+                Model-->>Loop: toolCall(real_tool)
+        end
+```
+
+这张图里最关键的一点是：**virtual tool 不是给用户看的抽象层，而是给模型看的暴露层代理。**
+
+### 26.3 这条链路在代码里分别落在哪些点
+
+| 时序步骤 | 代码入口 | 作用 |
+| --- | --- | --- |
+| 当前轮拿工具 | [DefaultToolCallingLoop.getAvailableTools()](../src/extension/prompt/node/defaultIntentRequestHandler.ts#L734) | 决定本轮是否做 tool grouping |
+| 创建 / 复用分组器 | [ToolGrouping](../src/extension/tools/common/virtualTools/toolGrouping.ts) | 保存 root tree、turnNo、expand 状态 |
+| 生成 virtual groups | [VirtualToolGrouper.addGroups()](../src/extension/tools/common/virtualTools/virtualToolGrouper.ts#L46) | 把大量真实工具折叠成 group |
+| 把 group 暴露成可调用工具 | [VirtualTool.tools()](../src/extension/tools/common/virtualTools/virtualTool.ts#L87) | 未展开时返回 `activate_*` 代理工具 |
+| 模型命中 group 后展开 | [ToolGrouping.didCall()](../src/extension/tools/common/virtualTools/toolGrouping.ts#L50) | 把 virtual tool 标记为已展开，并返回激活结果 |
+| 下轮重新计算可见工具 | [ToolGrouping.compute()](../src/extension/tools/common/virtualTools/toolGrouping.ts#L121) | 用展开后的 tree 重新生成可见工具集 |
+
+### 26.4 为什么系统不直接把所有真实工具都给模型
+
+从 [virtualToolsConstants.ts](../src/extension/tools/common/virtualTools/virtualToolsConstants.ts) 可以看出，这套机制本质上是在解决工具总量过大后的上下文压力与选择噪声问题。
+
+最值得记住的常量语义是：
+
+1. `START_GROUPING_AFTER_TOOL_COUNT` 表示从多少工具开始要考虑 grouping。
+2. `TOOLS_AND_GROUPS_LIMIT` 表示当 group 全部折叠时，最终最多给模型看多少“工具或组”。
+3. `TRIM_THRESHOLD` 表示什么时候应该把过度展开的 group 再收缩回去。
+
+因此，这个机制不是单纯为了“UI 上看着整齐”，而是为了控制模型在每轮决策时面对的选择空间。
+
+### 26.5 built-in、extension、MCP 工具在 grouping 里不是同一套路径
+
+`VirtualToolGrouper.addGroups()` 里一个很关键但容易被忽略的细节是：系统会先按工具来源拆开处理。
+
+大体上是三路：
+
+1. built-in tools
+2. extension tools
+3. MCP tools
+
+然后再决定：
+
+1. built-in tools 是否走 built-in grouping。
+2. extension / MCP 工具是否按 toolset 比例分配 slots。
+3. 某个 toolset 是直接逐个暴露，还是先折叠成多个 virtual group。
+
+所以 virtual tools 不是“把所有工具一起随便聚类”，而是先尊重 tool source，再做组装。
+
+### 26.6 命中 virtual tool 后，系统并不是立刻重发同一轮
+
+这点也很重要。`ToolGrouping.didCall()` 的职责不是在当前轮偷偷把组内真实工具塞回模型，而是：
+
+1. 把对应 `VirtualTool.isExpanded` 设为 `true`。
+2. 产出一个显式的 `LanguageModelToolResult`，告诉模型哪些工具已被激活。
+3. 等到下一轮 `compute()` 时，再把展开后的真实工具真正暴露出来。
+
+这意味着 virtual tool 更像一个显式的“能力解锁步骤”，而不是一次透明重写。
+
+### 26.7 一句话总结
+
+> Tool grouping 改写的不是单把工具的 schema，而是“本轮到底把哪些工具暴露给模型”这件事；virtual tool 先作为 `activate_*` 代理入口出现，只有在模型显式命中后，下一轮真实工具才会展开进入可见集合。
+
+---
+
+## 27. 大代码库 Q&A 专题已迁移
+
+这一组与当前案例直接相关的内容已经单独拆到专题文档，避免本文件继续膨胀、影响打开和导航性能。
+
+请直接阅读：
+
+- [Agent Mode 大代码库 Q&A 专题：以当前案例为中心的检索、转录、预取与轨迹分析](./agent-mode-codebase-qa-case-study.md)
+
+迁移内容包括原来的以下主题：
+
+1. 以当前这次 codebase Q&A 为案例，解释 Agent Mode 在大代码库里如何检索与收敛
+2. 把这次 codebase Q&A 还原成逐轮 transcript 风格的执行剖面
+3. 主代理与 SearchSubagent 的双层 transcript 模型
+4. `Codebase` 工具结果如何注入主 Agent prompt 和 metadata
+5. `Codebase` 预取路径 vs 普通工具调用路径
+6. `SearchSubagent` 的 `toolMetadata(subAgentInvocationId)` 如何连到 trajectory / request logging
+
+如果只想看这个专题，而不想通读整份执行设计文档，优先看上面的独立文件。

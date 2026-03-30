@@ -1,0 +1,68 @@
+{
+  "prompt": "title",
+  "promptId": "19f099a9-prompt",
+  "logCount": 1,
+  "logs": [
+    {
+      "id": "19f099a9",
+      "kind": "request",
+      "type": "ChatMLSuccess",
+      "name": "title",
+      "metadata": {
+        "requestType": "ChatCompletions",
+        "model": "gpt-4o-mini-2024-07-18",
+        "maxPromptTokens": 12285,
+        "maxResponseTokens": 4096,
+        "location": 1,
+        "startTime": "2026-03-29T05:33:46.133Z",
+        "endTime": "2026-03-29T05:33:46.675Z",
+        "duration": 542,
+        "ourRequestId": "1f25ced2-4b16-4fc6-865d-c2d2ff861a13",
+        "requestId": "1f25ced2-4b16-4fc6-865d-c2d2ff861a13",
+        "serverRequestId": "1f25ced2-4b16-4fc6-865d-c2d2ff861a13",
+        "timeToFirstToken": 452,
+        "usage": {
+          "completion_tokens": 8,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          },
+          "prompt_tokens": 214,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "total_tokens": 222,
+          "reasoning_tokens": 0
+        }
+      },
+      "requestMessages": {
+        "messages": [
+          {
+            "role": 0,
+            "content": [
+              {
+                "type": 1,
+                "text": "You are an expert in crafting pithy titles for chatbot conversations. You are presented with a chat request, and you reply with a brief title that captures the main topic of that request.\nFollow Microsoft content policies.\nAvoid content that violates copyrights.\nIf you are asked to generate content that is harmful, hateful, racist, sexist, lewd, or violent, only respond with \"Sorry, I can't assist with that.\"\nKeep your answers short and impersonal.\nThe title should not be wrapped in quotes. It should be about 8 words or fewer.\nHere are some examples of good titles:\n- Git rebase question\n- Installing Python packages\n- Location of LinkedList implementation in codebase\n- Adding a tree view to a VS Code extension\n- React useState hook usage"
+              }
+            ]
+          },
+          {
+            "role": 1,
+            "content": [
+              {
+                "type": 1,
+                "text": "Please write a brief title for the following request:\n\n请研究一下这个Copilot chat代码仓库是如何保证大语言模型在收到指令以后，可以long run execution而不轻易退出，草草收尾的"
+              }
+            ]
+          }
+        ]
+      },
+      "response": {
+        "type": "success",
+        "message": [
+          "Copilot chat long run execution analysis"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,1351 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "copilot-chat"
+            }
+          },
+          {
+            "key": "session.id",
+            "value": {
+              "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "copilot-chat"
+          },
+          "spans": [
+            {
+              "traceId": "00000000000000000000000000000004",
+              "spanId": "000000000000000a",
+              "parentSpanId": "0000000000000003",
+              "name": "execute_tool manage_todo_list",
+              "kind": 1,
+              "startTimeUnixNano": "1774707163426000000",
+              "endTimeUnixNano": "1774707163431000000",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "execute_tool"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.name",
+                  "value": {
+                    "stringValue": "manage_todo_list"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.type",
+                  "value": {
+                    "stringValue": "function"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.id",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.description",
+                  "value": {
+                    "stringValue": "Manage a structured todo list to track progress and plan tasks throughout your coding session. Use this tool VERY frequently to ensure task visibility and proper planning.\n\nWhen to use this tool:\n- Complex multi-step work requiring planning and tracking\n- When user provides multiple tasks or requests (numbered/comma-separated)\n- After receiving new instructions that require multiple steps\n- BEFORE starting work on any todo (mark as in-progress)\n- IMMEDIATELY after completing each todo (mark completed individually)\n- When breaking down larger tasks into smaller actionable steps\n- To give users visibility into your progress and planning\n\nWhen NOT to use:\n- Single, trivial tasks that can be completed in one step\n- Purely conversational/informational requests\n- When just reading files or performing simple searches\n\nCRITICAL workflow:\n1. Plan tasks by writing todo list with specific, actionable items\n2. Mark ONE todo as in-progress before starting work\n3. Complete the work for that specific todo\n4. Mark that todo as completed IMMEDIATELY\n5. Move to next todo and repeat\n\nTodo states:\n- not-started: Todo not yet begun\n- in-progress: Currently working (limit ONE at a time)\n- completed: Finished successfully\n\nIMPORTANT: Mark todos completed as soon as they are done. Do not batch completions."
+                  }
+                },
+                {
+                  "key": "copilot_chat.chat_session_id",
+                  "value": {
+                    "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.arguments",
+                  "value": {
+                    "stringValue": "{\"operation\":\"read\",\"chatSessionResource\":{\"$mid\":1,\"external\":\"vscode-chat-session://local/ZmZmZTI2NDgtNTFjYi00NDU4LWFiMzUtZTU5M2E5NGQ2MTkx\",\"path\":\"/ZmZmZTI2NDgtNTFjYi00NDU4LWFiMzUtZTU5M2E5NGQ2MTkx\",\"scheme\":\"vscode-chat-session\",\"authority\":\"local\"}}"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.result",
+                  "value": {
+                    "stringValue": "No todo list found."
+                  }
+                }
+              ],
+              "events": [],
+              "status": {
+                "code": 1
+              }
+            },
+            {
+              "traceId": "00000000000000000000000000000004",
+              "spanId": "000000000000000c",
+              "parentSpanId": "0000000000000003",
+              "name": "chat gpt-5.4",
+              "kind": 1,
+              "startTimeUnixNano": "1774707163827000000",
+              "endTimeUnixNano": "1774707172019000000",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "chat"
+                  }
+                },
+                {
+                  "key": "gen_ai.provider.name",
+                  "value": {
+                    "stringValue": "github"
+                  }
+                },
+                {
+                  "key": "gen_ai.request.model",
+                  "value": {
+                    "stringValue": "gpt-5.4"
+                  }
+                },
+                {
+                  "key": "gen_ai.conversation.id",
+                  "value": {
+                    "stringValue": "745fe291-e341-4dd4-8bc0-8a1872af5fca"
+                  }
+                },
+                {
+                  "key": "gen_ai.request.max_tokens",
+                  "value": {
+                    "intValue": "128000"
+                  }
+                },
+                {
+                  "key": "copilot_chat.request.max_prompt_tokens",
+                  "value": {
+                    "intValue": "271997"
+                  }
+                },
+                {
+                  "key": "copilot_chat.session_id",
+                  "value": {
+                    "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+                  }
+                },
+                {
+                  "key": "copilot_chat.chat_session_id",
+                  "value": {
+                    "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+                  }
+                },
+                {
+                  "key": "gen_ai.agent.name",
+                  "value": {
+                    "stringValue": "panel/editAgent"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.input_tokens",
+                  "value": {
+                    "intValue": "21549"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.output_tokens",
+                  "value": {
+                    "intValue": "348"
+                  }
+                },
+                {
+                  "key": "gen_ai.response.model",
+                  "value": {
+                    "stringValue": "gpt-5.4-2026-03-05"
+                  }
+                },
+                {
+                  "key": "gen_ai.response.id",
+                  "value": {
+                    "stringValue": "745fe291-e341-4dd4-8bc0-8a1872af5fca"
+                  }
+                },
+                {
+                  "key": "gen_ai.response.finish_reasons",
+                  "value": {
+                    "arrayValue": {
+                      "values": [
+                        {
+                          "stringValue": "stop"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.cache_read.input_tokens",
+                  "value": {
+                    "intValue": "4608"
+                  }
+                },
+                {
+                  "key": "copilot_chat.time_to_first_token",
+                  "value": {
+                    "intValue": "6031"
+                  }
+                },
+                {
+                  "key": "copilot_chat.server_request_id",
+                  "value": {
+                    "stringValue": "745fe291-e341-4dd4-8bc0-8a1872af5fca"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.reasoning_tokens",
+                  "value": {
+                    "intValue": "247"
+                  }
+                },
+                {
+                  "key": "gen_ai.output.messages",
+                  "value": {
+                    "stringValue": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"I need the active directory first so I can place a.txt in the right location, then I’ll create it there.\"},{\"type\":\"tool_call\",\"id\":\"call_ERKfMC08GFgyxd6bGqjQFiQG\",\"name\":\"run_in_terminal\",\"arguments\":\"{\\\"command\\\":\\\"Get-Location | Select-Object -ExpandProperty Path\\\",\\\"explanation\\\":\\\"Check the current PowerShell working directory so the new file is created in the expected location.\\\",\\\"goal\\\":\\\"Determine target directory for a.txt\\\",\\\"isBackground\\\":false,\\\"timeout\\\":0}\"}]}]"
+                  }
+                }
+              ],
+              "events": [],
+              "status": {
+                "code": 0
+              }
+            },
+            {
+              "traceId": "00000000000000000000000000000004",
+              "spanId": "000000000000000d",
+              "parentSpanId": "0000000000000003",
+              "name": "execute_tool run_in_terminal",
+              "kind": 1,
+              "startTimeUnixNano": "1774707172102000000",
+              "endTimeUnixNano": "1774707173728000000",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "execute_tool"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.name",
+                  "value": {
+                    "stringValue": "run_in_terminal"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.type",
+                  "value": {
+                    "stringValue": "function"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.id",
+                  "value": {
+                    "stringValue": "call_ERKfMC08GFgyxd6bGqjQFiQG"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.description",
+                  "value": {
+                    "stringValue": "This tool allows you to execute PowerShell commands in a persistent terminal session, preserving environment variables, working directory, and other context across multiple commands.\n\nCommand Execution:\n- Prefer ; when chaining commands on one line\n- Prefer pipelines | for object-based data flow\n- Never create a sub-shell (eg. powershell -c \"command\") unless explicitly asked\n\nDirectory Management:\n- Prefer relative paths when navigating directories, only use absolute when the path is far away or the current cwd is not expected\n- Remember when isBackground=false is specified, that the shell and cwd are reused until it is moved to the background\n- Use $PWD or Get-Location for current directory\n- Use Push-Location/Pop-Location for directory stack\n\nProgram Execution:\n- Supports .NET, Python, Node.js, and other executables\n- Install modules via Install-Module, Install-Package\n- Use Get-Command to verify cmdlet/function availability\n\nBackground Processes:\n- For long-running tasks (e.g., servers), set isBackground=true\n- Returns a terminal ID for checking status and runtime later\n- Use Start-Job for background PowerShell jobs\n\nOutput Management:\n- Output is automatically truncated if longer than 60KB to prevent context overflow\n- Use Select-Object, Where-Object, Format-Table to filter output\n- Use -First/-Last parameters to limit results\n- For pager commands, add | Out-String or | Format-List\n\nBest Practices:\n- Use proper cmdlet names instead of aliases in scripts\n- Quote paths with spaces: \"C:\\Path With Spaces\"\n- Prefer PowerShell cmdlets over external commands when available\n- Prefer idiomatic PowerShell like Get-ChildItem instead of dir or ls for file listings\n- Use Test-Path to check file/directory existence\n- Be specific with Select-Object properties to avoid excessive output\n- Avoid printing credentials unless absolutely required"
+                  }
+                },
+                {
+                  "key": "copilot_chat.chat_session_id",
+                  "value": {
+                    "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.arguments",
+                  "value": {
+                    "stringValue": "{\"command\":\"Get-Location | Select-Object -ExpandProperty Path\",\"explanation\":\"Check the current PowerShell working directory so the new file is created in the expected location.\",\"goal\":\"Determine target directory for a.txt\",\"isBackground\":false,\"timeout\":0}"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.result",
+                  "value": {
+                    "stringValue": "C:\\Users\\lsheng2"
+                  }
+                }
+              ],
+              "events": [],
+              "status": {
+                "code": 1
+              }
+            },
+            {
+              "traceId": "00000000000000000000000000000004",
+              "spanId": "000000000000000e",
+              "parentSpanId": "0000000000000003",
+              "name": "chat gpt-5.4",
+              "kind": 1,
+              "startTimeUnixNano": "1774707173775000000",
+              "endTimeUnixNano": "1774707175676000000",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "chat"
+                  }
+                },
+                {
+                  "key": "gen_ai.provider.name",
+                  "value": {
+                    "stringValue": "github"
+                  }
+                },
+                {
+                  "key": "gen_ai.request.model",
+                  "value": {
+                    "stringValue": "gpt-5.4"
+                  }
+                },
+                {
+                  "key": "gen_ai.conversation.id",
+                  "value": {
+                    "stringValue": "745fe291-e341-4dd4-8bc0-8a1872af5fca"
+                  }
+                },
+                {
+                  "key": "gen_ai.request.max_tokens",
+                  "value": {
+                    "intValue": "128000"
+                  }
+                },
+                {
+                  "key": "copilot_chat.request.max_prompt_tokens",
+                  "value": {
+                    "intValue": "271997"
+                  }
+                },
+                {
+                  "key": "copilot_chat.session_id",
+                  "value": {
+                    "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+                  }
+                },
+                {
+                  "key": "copilot_chat.chat_session_id",
+                  "value": {
+                    "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+                  }
+                },
+                {
+                  "key": "gen_ai.agent.name",
+                  "value": {
+                    "stringValue": "panel/editAgent"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.input_tokens",
+                  "value": {
+                    "intValue": "21916"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.output_tokens",
+                  "value": {
+                    "intValue": "78"
+                  }
+                },
+                {
+                  "key": "gen_ai.response.model",
+                  "value": {
+                    "stringValue": "gpt-5.4-2026-03-05"
+                  }
+                },
+                {
+                  "key": "gen_ai.response.id",
+                  "value": {
+                    "stringValue": "745fe291-e341-4dd4-8bc0-8a1872af5fca"
+                  }
+                },
+                {
+                  "key": "gen_ai.response.finish_reasons",
+                  "value": {
+                    "arrayValue": {
+                      "values": [
+                        {
+                          "stringValue": "stop"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.cache_read.input_tokens",
+                  "value": {
+                    "intValue": "21760"
+                  }
+                },
+                {
+                  "key": "copilot_chat.time_to_first_token",
+                  "value": {
+                    "intValue": "1640"
+                  }
+                },
+                {
+                  "key": "copilot_chat.server_request_id",
+                  "value": {
+                    "stringValue": "745fe291-e341-4dd4-8bc0-8a1872af5fca"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.reasoning_tokens",
+                  "value": {
+                    "intValue": "21"
+                  }
+                },
+                {
+                  "key": "gen_ai.output.messages",
+                  "value": {
+                    "stringValue": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"I found the current directory and am creating a.txt there with the requested content.\"},{\"type\":\"tool_call\",\"id\":\"call_aG38slof9JRLMhwlUOULfpdz\",\"name\":\"create_file\",\"arguments\":\"{\\\"filePath\\\":\\\"C:\\\\\\\\Users\\\\\\\\lsheng2\\\\\\\\a.txt\\\",\\\"content\\\":\\\"abc\\\"}\"}]}]"
+                  }
+                }
+              ],
+              "events": [],
+              "status": {
+                "code": 0
+              }
+            },
+            {
+              "traceId": "00000000000000000000000000000004",
+              "spanId": "000000000000000f",
+              "parentSpanId": "0000000000000003",
+              "name": "execute_tool create_file",
+              "kind": 1,
+              "startTimeUnixNano": "1774707175711000000",
+              "endTimeUnixNano": "1774707179601000000",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "execute_tool"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.name",
+                  "value": {
+                    "stringValue": "create_file"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.type",
+                  "value": {
+                    "stringValue": "function"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.id",
+                  "value": {
+                    "stringValue": "call_aG38slof9JRLMhwlUOULfpdz"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.description",
+                  "value": {
+                    "stringValue": "This is a tool for creating a new file in the workspace. The file will be created with the specified content. The directory will be created if it does not already exist. Never use this tool to edit a file that already exists."
+                  }
+                },
+                {
+                  "key": "copilot_chat.chat_session_id",
+                  "value": {
+                    "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.arguments",
+                  "value": {
+                    "stringValue": "{\"filePath\":\"C:\\\\Users\\\\lsheng2\\\\a.txt\",\"content\":\"abc\"}"
+                  }
+                },
+                {
+                  "key": "error.type",
+                  "value": {
+                    "stringValue": "Error"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.result",
+                  "value": {
+                    "stringValue": "ERROR: File already exists. You must use an edit tool to modify it."
+                  }
+                }
+              ],
+              "events": [],
+              "status": {
+                "code": 2,
+                "message": "File already exists. You must use an edit tool to modify it."
+              }
+            },
+            {
+              "traceId": "00000000000000000000000000000004",
+              "spanId": "0000000000000012",
+              "parentSpanId": "0000000000000003",
+              "name": "chat gpt-5.4",
+              "kind": 1,
+              "startTimeUnixNano": "1774707179623000000",
+              "endTimeUnixNano": "1774707183838000000",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "chat"
+                  }
+                },
+                {
+                  "key": "gen_ai.provider.name",
+                  "value": {
+                    "stringValue": "github"
+                  }
+                },
+                {
+                  "key": "gen_ai.request.model",
+                  "value": {
+                    "stringValue": "gpt-5.4"
+                  }
+                },
+                {
+                  "key": "gen_ai.conversation.id",
+                  "value": {
+                    "stringValue": "745fe291-e341-4dd4-8bc0-8a1872af5fca"
+                  }
+                },
+                {
+                  "key": "gen_ai.request.max_tokens",
+                  "value": {
+                    "intValue": "128000"
+                  }
+                },
+                {
+                  "key": "copilot_chat.request.max_prompt_tokens",
+                  "value": {
+                    "intValue": "271997"
+                  }
+                },
+                {
+                  "key": "copilot_chat.session_id",
+                  "value": {
+                    "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+                  }
+                },
+                {
+                  "key": "copilot_chat.chat_session_id",
+                  "value": {
+                    "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+                  }
+                },
+                {
+                  "key": "gen_ai.agent.name",
+                  "value": {
+                    "stringValue": "panel/editAgent"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.input_tokens",
+                  "value": {
+                    "intValue": "22032"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.output_tokens",
+                  "value": {
+                    "intValue": "138"
+                  }
+                },
+                {
+                  "key": "gen_ai.response.model",
+                  "value": {
+                    "stringValue": "gpt-5.4-2026-03-05"
+                  }
+                },
+                {
+                  "key": "gen_ai.response.id",
+                  "value": {
+                    "stringValue": "745fe291-e341-4dd4-8bc0-8a1872af5fca"
+                  }
+                },
+                {
+                  "key": "gen_ai.response.finish_reasons",
+                  "value": {
+                    "arrayValue": {
+                      "values": [
+                        {
+                          "stringValue": "stop"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.cache_read.input_tokens",
+                  "value": {
+                    "intValue": "21888"
+                  }
+                },
+                {
+                  "key": "copilot_chat.time_to_first_token",
+                  "value": {
+                    "intValue": "2611"
+                  }
+                },
+                {
+                  "key": "copilot_chat.server_request_id",
+                  "value": {
+                    "stringValue": "745fe291-e341-4dd4-8bc0-8a1872af5fca"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.reasoning_tokens",
+                  "value": {
+                    "intValue": "72"
+                  }
+                },
+                {
+                  "key": "gen_ai.output.messages",
+                  "value": {
+                    "stringValue": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"a.txt already exists, so I’m checking its current contents before updating it safely to abc.\"},{\"type\":\"tool_call\",\"id\":\"call_OwmC817kjasiRowJmm2wISvi\",\"name\":\"read_file\",\"arguments\":\"{\\\"filePath\\\":\\\"C:\\\\\\\\Users\\\\\\\\lsheng2\\\\\\\\a.txt\\\",\\\"startLine\\\":1,\\\"endLine\\\":20}\"}]}]"
+                  }
+                }
+              ],
+              "events": [],
+              "status": {
+                "code": 0
+              }
+            },
+            {
+              "traceId": "00000000000000000000000000000004",
+              "spanId": "0000000000000013",
+              "parentSpanId": "0000000000000003",
+              "name": "execute_tool read_file",
+              "kind": 1,
+              "startTimeUnixNano": "1774707183869000000",
+              "endTimeUnixNano": "1774707188996000000",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "execute_tool"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.name",
+                  "value": {
+                    "stringValue": "read_file"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.type",
+                  "value": {
+                    "stringValue": "function"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.id",
+                  "value": {
+                    "stringValue": "call_OwmC817kjasiRowJmm2wISvi"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.description",
+                  "value": {
+                    "stringValue": "Read the contents of a file.\n\nYou must specify the line range you're interested in. Line numbers are 1-indexed. If the file contents returned are insufficient for your task, you may call this tool again to retrieve more content. Prefer reading larger ranges over doing many small reads. Binary files use startLine/endLine as byte offsets."
+                  }
+                },
+                {
+                  "key": "copilot_chat.chat_session_id",
+                  "value": {
+                    "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.arguments",
+                  "value": {
+                    "stringValue": "{\"filePath\":\"C:\\\\Users\\\\lsheng2\\\\a.txt\",\"startLine\":1,\"endLine\":20}"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.result",
+                  "value": {
+                    "stringValue": "{\"node\":{\"type\":1,\"ctor\":2,\"ctorName\":\"A2e\",\"children\":[{\"type\":1,\"ctor\":2,\"ctorName\":\"gn\",\"children\":[{\"type\":1,\"ctor\":2,\"ctorName\":\"IOe\",\"children\":[{\"type\":2,\"priority\":1,\"text\":\"dummy\",\"references\":[{\"anchor\":{\"$mid\":1,\"fsPath\":\"c:\\\\Users\\\\lsheng2\\\\a.txt\",\"_sep\":1,\"external\":\"file:///c%3A/Users/lsheng2/a.txt\",\"path\":\"/C:/Users/lsheng2/a.txt\",\"scheme\":\"file\"},\"options\":{\"isFromTool\":true}}],\"lineBreakBefore\":true}],\"props\":{\"priority\":1},\"references\":[]}],\"props\":{},\"references\":[]}],\"props\":{},\"references\":[]}}"
+                  }
+                }
+              ],
+              "events": [],
+              "status": {
+                "code": 1
+              }
+            },
+            {
+              "traceId": "00000000000000000000000000000004",
+              "spanId": "0000000000000014",
+              "parentSpanId": "0000000000000003",
+              "name": "chat gpt-5.4",
+              "kind": 1,
+              "startTimeUnixNano": "1774707189015000000",
+              "endTimeUnixNano": "1774707191532000000",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "chat"
+                  }
+                },
+                {
+                  "key": "gen_ai.provider.name",
+                  "value": {
+                    "stringValue": "github"
+                  }
+                },
+                {
+                  "key": "gen_ai.request.model",
+                  "value": {
+                    "stringValue": "gpt-5.4"
+                  }
+                },
+                {
+                  "key": "gen_ai.conversation.id",
+                  "value": {
+                    "stringValue": "745fe291-e341-4dd4-8bc0-8a1872af5fca"
+                  }
+                },
+                {
+                  "key": "gen_ai.request.max_tokens",
+                  "value": {
+                    "intValue": "128000"
+                  }
+                },
+                {
+                  "key": "copilot_chat.request.max_prompt_tokens",
+                  "value": {
+                    "intValue": "271997"
+                  }
+                },
+                {
+                  "key": "copilot_chat.session_id",
+                  "value": {
+                    "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+                  }
+                },
+                {
+                  "key": "copilot_chat.chat_session_id",
+                  "value": {
+                    "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+                  }
+                },
+                {
+                  "key": "gen_ai.agent.name",
+                  "value": {
+                    "stringValue": "panel/editAgent"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.input_tokens",
+                  "value": {
+                    "intValue": "22182"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.output_tokens",
+                  "value": {
+                    "intValue": "105"
+                  }
+                },
+                {
+                  "key": "gen_ai.response.model",
+                  "value": {
+                    "stringValue": "gpt-5.4-2026-03-05"
+                  }
+                },
+                {
+                  "key": "gen_ai.response.id",
+                  "value": {
+                    "stringValue": "745fe291-e341-4dd4-8bc0-8a1872af5fca"
+                  }
+                },
+                {
+                  "key": "gen_ai.response.finish_reasons",
+                  "value": {
+                    "arrayValue": {
+                      "values": [
+                        {
+                          "stringValue": "stop"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.cache_read.input_tokens",
+                  "value": {
+                    "intValue": "22016"
+                  }
+                },
+                {
+                  "key": "copilot_chat.time_to_first_token",
+                  "value": {
+                    "intValue": "1886"
+                  }
+                },
+                {
+                  "key": "copilot_chat.server_request_id",
+                  "value": {
+                    "stringValue": "745fe291-e341-4dd4-8bc0-8a1872af5fca"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.reasoning_tokens",
+                  "value": {
+                    "intValue": "13"
+                  }
+                },
+                {
+                  "key": "gen_ai.output.messages",
+                  "value": {
+                    "stringValue": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"I’m replacing the existing placeholder content so the file ends up exactly as requested.\"},{\"type\":\"tool_call\",\"id\":\"call_PUr784FQcnvAUvDZ7hlyhot0\",\"name\":\"apply_patch\",\"arguments\":\"{\\\"input\\\":\\\"*** Begin Patch\\\\n*** Update File: C:\\\\\\\\Users\\\\\\\\lsheng2\\\\\\\\a.txt\\\\n@@\\\\n-dummy\\\\n+abc\\\\n*** End Patch\\\",\\\"explanation\\\":\\\"Update the existing a.txt file so its content is exactly 'abc'.\\\"}\"}]}]"
+                  }
+                }
+              ],
+              "events": [],
+              "status": {
+                "code": 0
+              }
+            },
+            {
+              "traceId": "00000000000000000000000000000004",
+              "spanId": "0000000000000015",
+              "parentSpanId": "0000000000000003",
+              "name": "execute_tool apply_patch",
+              "kind": 1,
+              "startTimeUnixNano": "1774707191580000000",
+              "endTimeUnixNano": "1774707198582000000",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "execute_tool"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.name",
+                  "value": {
+                    "stringValue": "apply_patch"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.type",
+                  "value": {
+                    "stringValue": "function"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.id",
+                  "value": {
+                    "stringValue": "call_PUr784FQcnvAUvDZ7hlyhot0"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.description",
+                  "value": {
+                    "stringValue": "Edit text files. Do not use this tool to edit Jupyter notebooks. `apply_patch` allows you to execute a diff/patch against a text file, but the format of the diff specification is unique to this task, so pay careful attention to these instructions. To use the `apply_patch` command, you should pass a message of the following structure as \"input\":\n\n*** Begin Patch\n[YOUR_PATCH]\n*** End Patch\n\nWhere [YOUR_PATCH] is the actual content of your patch, specified in the following V4A diff format.\n\n*** [ACTION] File: [/absolute/path/to/file] -> ACTION can be one of Add, Update, or Delete.\nAn example of a message that you might pass as \"input\" to this function, in order to apply a patch, is shown below.\n\n*** Begin Patch\n*** Update File: /Users/someone/pygorithm/searching/binary_search.py\n@@class BaseClass\n@@    def search():\n-        pass\n+        raise NotImplementedError()\n\n@@class Subclass\n@@    def search():\n-        pass\n+        raise NotImplementedError()\n\n*** End Patch\nDo not use line numbers in this diff format."
+                  }
+                },
+                {
+                  "key": "copilot_chat.chat_session_id",
+                  "value": {
+                    "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.arguments",
+                  "value": {
+                    "stringValue": "{\"input\":\"*** Begin Patch\\n*** Update File: C:\\\\Users\\\\lsheng2\\\\a.txt\\n@@\\n-dummy\\n+abc\\n*** End Patch\",\"explanation\":\"Update the existing a.txt file so its content is exactly 'abc'.\"}"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.result",
+                  "value": {
+                    "stringValue": "{\"node\":{\"type\":1,\"ctor\":2,\"ctorName\":\"pI\",\"children\":[{\"type\":2,\"priority\":9007199254740991,\"text\":\"The following files were successfully edited:\",\"lineBreakBefore\":false},{\"type\":2,\"priority\":9007199254740991,\"text\":\"\\n\",\"lineBreakBefore\":false},{\"type\":2,\"priority\":9007199254740991,\"text\":\"c:\\\\Users\\\\lsheng2\\\\a.txt\",\"lineBreakBefore\":false},{\"type\":2,\"priority\":9007199254740991,\"text\":\"\\n\",\"lineBreakBefore\":false}],\"props\":{},\"references\":[]}}"
+                  }
+                }
+              ],
+              "events": [],
+              "status": {
+                "code": 1
+              }
+            },
+            {
+              "traceId": "00000000000000000000000000000004",
+              "spanId": "0000000000000018",
+              "parentSpanId": "0000000000000003",
+              "name": "chat gpt-5.4",
+              "kind": 1,
+              "startTimeUnixNano": "1774707198626000000",
+              "endTimeUnixNano": "1774707203253000000",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "chat"
+                  }
+                },
+                {
+                  "key": "gen_ai.provider.name",
+                  "value": {
+                    "stringValue": "github"
+                  }
+                },
+                {
+                  "key": "gen_ai.request.model",
+                  "value": {
+                    "stringValue": "gpt-5.4"
+                  }
+                },
+                {
+                  "key": "gen_ai.conversation.id",
+                  "value": {
+                    "stringValue": "745fe291-e341-4dd4-8bc0-8a1872af5fca"
+                  }
+                },
+                {
+                  "key": "gen_ai.request.max_tokens",
+                  "value": {
+                    "intValue": "128000"
+                  }
+                },
+                {
+                  "key": "copilot_chat.request.max_prompt_tokens",
+                  "value": {
+                    "intValue": "271997"
+                  }
+                },
+                {
+                  "key": "copilot_chat.session_id",
+                  "value": {
+                    "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+                  }
+                },
+                {
+                  "key": "copilot_chat.chat_session_id",
+                  "value": {
+                    "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+                  }
+                },
+                {
+                  "key": "gen_ai.agent.name",
+                  "value": {
+                    "stringValue": "panel/editAgent"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.input_tokens",
+                  "value": {
+                    "intValue": "22315"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.output_tokens",
+                  "value": {
+                    "intValue": "144"
+                  }
+                },
+                {
+                  "key": "gen_ai.response.model",
+                  "value": {
+                    "stringValue": "gpt-5.4-2026-03-05"
+                  }
+                },
+                {
+                  "key": "gen_ai.response.id",
+                  "value": {
+                    "stringValue": "745fe291-e341-4dd4-8bc0-8a1872af5fca"
+                  }
+                },
+                {
+                  "key": "gen_ai.response.finish_reasons",
+                  "value": {
+                    "arrayValue": {
+                      "values": [
+                        {
+                          "stringValue": "stop"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.cache_read.input_tokens",
+                  "value": {
+                    "intValue": "22144"
+                  }
+                },
+                {
+                  "key": "copilot_chat.time_to_first_token",
+                  "value": {
+                    "intValue": "4427"
+                  }
+                },
+                {
+                  "key": "copilot_chat.server_request_id",
+                  "value": {
+                    "stringValue": "745fe291-e341-4dd4-8bc0-8a1872af5fca"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.reasoning_tokens",
+                  "value": {
+                    "intValue": "106"
+                  }
+                },
+                {
+                  "key": "gen_ai.output.messages",
+                  "value": {
+                    "stringValue": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"Created a.txt in the current PowerShell directory with content abc. The file was already present, so I updated it in place to match your requested content exactly.\"}]}]"
+                  }
+                }
+              ],
+              "events": [],
+              "status": {
+                "code": 0
+              }
+            },
+            {
+              "traceId": "00000000000000000000000000000004",
+              "spanId": "0000000000000003",
+              "name": "invoke_agent GitHub Copilot Chat",
+              "kind": 1,
+              "startTimeUnixNano": "1774707161669000000",
+              "endTimeUnixNano": "1774707203266000000",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "invoke_agent"
+                  }
+                },
+                {
+                  "key": "gen_ai.provider.name",
+                  "value": {
+                    "stringValue": "github"
+                  }
+                },
+                {
+                  "key": "gen_ai.agent.name",
+                  "value": {
+                    "stringValue": "GitHub Copilot Chat"
+                  }
+                },
+                {
+                  "key": "gen_ai.conversation.id",
+                  "value": {
+                    "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+                  }
+                },
+                {
+                  "key": "copilot_chat.session_id",
+                  "value": {
+                    "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+                  }
+                },
+                {
+                  "key": "copilot_chat.chat_session_id",
+                  "value": {
+                    "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+                  }
+                },
+                {
+                  "key": "gen_ai.request.model",
+                  "value": {
+                    "stringValue": "gpt-5.4"
+                  }
+                },
+                {
+                  "key": "gen_ai.input.messages",
+                  "value": {
+                    "stringValue": "[{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"please create a file - a.txt with content abc\"}]}]"
+                  }
+                },
+                {
+                  "key": "copilot_chat.turn_count",
+                  "value": {
+                    "intValue": "5"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.input_tokens",
+                  "value": {
+                    "intValue": "109994"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.output_tokens",
+                  "value": {
+                    "intValue": "813"
+                  }
+                },
+                {
+                  "key": "gen_ai.response.model",
+                  "value": {
+                    "stringValue": "gpt-5.4-2026-03-05"
+                  }
+                },
+                {
+                  "key": "gen_ai.output.messages",
+                  "value": {
+                    "stringValue": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"Created a.txt in the current PowerShell directory with content abc. The file was already present, so I updated it in place to match your requested content exactly.\"}]}]"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.definitions",
+                  "value": {
+                    "stringValue": "[{\"type\":\"function\",\"name\":\"apply_patch\",\"description\":\"Edit text files. Do not use this tool to edit Jupyter notebooks. `apply_patch` allows you to execute a diff/patch against a text file, but the format of the diff specification is unique to this task, so pay careful attention to these instructions. To use the `apply_patch` command, you should pass a message of the following structure as \\\"input\\\":\\n\\n*** Begin Patch\\n[YOUR_PATCH]\\n*** End Patch\\n\\nWhere [YOUR_PATCH] is the actual content of your patch, specified in the following V4A diff format.\\n\\n*** [ACTION] File: [/absolute/path/to/file] -> ACTION can be one of Add, Update, or Delete.\\nAn example of a message that you might pass as \\\"input\\\" to this function, in order to apply a patch, is shown below.\\n\\n*** Begin Patch\\n*** Update File: /Users/someone/pygorithm/searching/binary_search.py\\n@@class BaseClass\\n@@    def search():\\n-        pass\\n+        raise NotImplementedError()\\n\\n@@class Subclass\\n@@    def search():\\n-        pass\\n+        raise NotImplementedError()\\n\\n*** End Patch\\nDo not use line numbers in this diff format.\"},{\"type\":\"function\",\"name\":\"create_directory\",\"description\":\"Create a new directory structure in the workspace. Will recursively create all directories in the path, like mkdir -p. You do not need to use this tool before using create_file, that tool will automatically create the needed directories.\"},{\"type\":\"function\",\"name\":\"create_file\",\"description\":\"This is a tool for creating a new file in the workspace. The file will be created with the specified content. The directory will be created if it does not already exist. Never use this tool to edit a file that already exists.\"},{\"type\":\"function\",\"name\":\"create_new_jupyter_notebook\",\"description\":\"Generates a new Jupyter Notebook (.ipynb) in VS Code. Jupyter Notebooks are interactive documents commonly used for data exploration, analysis, visualization, and combining code with narrative text. Prefer creating plain Python files or similar unless a user explicitly requests creating a new Jupyter Notebook or already has a Jupyter Notebook opened or exists in the workspace.\"},{\"type\":\"function\",\"name\":\"create_new_workspace\",\"description\":\"Get comprehensive setup steps to help the user create complete project structures in a VS Code workspace. This tool is designed for full project initialization and scaffolding, not for creating individual files.\\n\\nWhen to use this tool:\\n- User wants to create a new complete project from scratch\\n- Setting up entire project frameworks (TypeScript projects, React apps, Node.js servers, etc.)\\n- Initializing Model Context Protocol (MCP) servers with full structure\\n- Creating VS Code extensions with proper scaffolding\\n- Setting up Next.js, Vite, or other framework-based projects\\n- User asks for \\\"new project\\\", \\\"create a workspace\\\", \\\"set up a [framework] project\\\"\\n- Need to establish complete development environment with dependencies, config files, and folder structure\\n\\nWhen NOT to use this tool:\\n- Creating single files or small code snippets\\n- Adding individual files to existing projects\\n- Making modifications to existing codebases\\n- User asks to \\\"create a file\\\" or \\\"add a component\\\"\\n- Simple code examples or demonstrations\\n- Debugging or fixing existing code\\n\\nThis tool provides complete project setup including:\\n- Folder structure creation\\n- Package.json and dependency management\\n- Configuration files (tsconfig, eslint, etc.)\\n- Initial boilerplate code\\n- Development environment setup\\n- Build and run instructions\\n\\nUse other file creation tools for individual files within existing projects.\"},{\"type\":\"function\",\"name\":\"edit_notebook_file\",\"description\":\"This is a tool for editing an existing Notebook file in the workspace. Generate the \\\"explanation\\\" property first.\\nThe system is very smart and can understand how to apply your edits to the notebooks.\\nWhen updating the content of an existing cell, ensure newCode preserves whitespace and indentation exactly and does NOT include any code markers such as (...existing code...).\"},{\"type\":\"function\",\"name\":\"fetch_webpage\",\"description\":\"Fetches the main content from a web page. This tool is useful for summarizing or analyzing the content of a webpage. You should use this tool when you think the user is looking for information from a specific webpage.\"},{\"type\":\"function\",\"name\":\"file_search\",\"description\":\"Search for files in the workspace by glob pattern. This only returns the paths of matching files. Use this tool when you know the exact filename pattern of the files you're searching for. Glob patterns match from the root of the workspace folder. Examples:\\n- **/*.{js,ts} to match all js/ts files in the workspace.\\n- src/** to match all files under the top-level src folder.\\n- **/foo/**/*.js to match all js files under any foo folder in the workspace.\\n\\nIn a multi-root workspace, you can scope the search to a specific workspace folder by using the absolute path to the folder as the query, e.g. /path/to/folder/**/*.ts.\"},{\"type\":\"function\",\"name\":\"grep_search\",\"description\":\"Do a fast text search in the workspace. Use this tool when you want to search with an exact string or regex. If you are not sure what words will appear in the workspace, prefer using regex patterns with alternation (|) or character classes to search for multiple potential words at once instead of making separate searches. For example, use 'function|method|procedure' to look for all of those words at once. Use includePattern to search within files matching a specific pattern, or in a specific file, using a relative path. Use 'includeIgnoredFiles' to include files normally ignored by .gitignore, other ignore files, and `files.exclude` and `search.exclude` settings. Warning: using this may cause the search to be slower, only set it when you want to search in ignored folders like node_modules or build outputs. Use this tool when you want to see an overview of a particular file, instead of using read_file many times to look for code within a file.\\n\\nIn a multi-root workspace, you can scope the search to a specific workspace folder by using the absolute path to the folder as the includePattern, e.g. /path/to/folder.\"},{\"type\":\"function\",\"name\":\"get_changed_files\",\"description\":\"Get git diffs of current file changes in a git repository. Don't forget that you can use run_in_terminal to run git commands in a terminal as well.\"},{\"type\":\"function\",\"name\":\"get_errors\",\"description\":\"Get any compile or lint errors in a specific file or across all files. If the user mentions errors or problems in a file, they may be referring to these. Use the tool to see the same errors that the user is seeing. If the user asks you to analyze all errors, or does not specify a file, use this tool to gather errors for all files. Also use this tool after editing a file to validate the change.\"},{\"type\":\"function\",\"name\":\"copilot_getNotebookSummary\",\"description\":\"This is a tool returns the list of the Notebook cells along with the id, cell types, line ranges, language, execution information and output mime types for each cell. This is useful to get Cell Ids when executing a notebook or determine what cells have been executed and what order, or what cells have outputs. If required to read contents of a cell use this to determine the line range of a cells, and then use read_file tool to read a specific line range. Requery this tool if the contents of the notebook change.\"},{\"type\":\"function\",\"name\":\"get_project_setup_info\",\"description\":\"Do not call this tool without first calling the tool to create a workspace. This tool provides a project setup information for a Visual Studio Code workspace based on a project type and programming language.\"},{\"type\":\"function\",\"name\":\"get_search_view_results\",\"description\":\"The results from the search view\"},{\"type\":\"function\",\"name\":\"get_vscode_api\",\"description\":\"Get comprehensive VS Code API documentation and references for extension development. This tool provides authoritative documentation for VS Code's extensive API surface, including proposed APIs, contribution points, and best practices. Use this tool for understanding complex VS Code API interactions.\\n\\nWhen to use this tool:\\n- User asks about specific VS Code APIs, interfaces, or extension capabilities\\n- Need documentation for VS Code extension contribution points (commands, views, settings, etc.)\\n- Questions about proposed APIs and their usage patterns\\n- Understanding VS Code extension lifecycle, activation events, and packaging\\n- Best practices for VS Code extension development architecture\\n- API examples and code patterns for extension features\\n- Troubleshooting extension-specific issues or API limitations\\n\\nWhen NOT to use this tool:\\n- Creating simple standalone files or scripts unrelated to VS Code extensions\\n- General programming questions not specific to VS Code extension development\\n- Questions about using VS Code as an editor (user-facing features)\\n- Non-extension related development tasks\\n- File creation or editing that doesn't involve VS Code extension APIs\\n\\nCRITICAL usage guidelines:\\n1. Always include specific API names, interfaces, or concepts in your query\\n2. Mention the extension feature you're trying to implement\\n3. Include context about proposed vs stable APIs when relevant\\n4. Reference specific contribution points when asking about extension manifest\\n5. Be specific about the VS Code version or API version when known\\n\\nScope: This tool is for EXTENSION DEVELOPMENT ONLY - building tools that extend VS Code itself, not for general file creation or non-extension programming tasks.\"},{\"type\":\"function\",\"name\":\"install_extension\",\"description\":\"Install an extension in VS Code. Use this tool to install an extension in Visual Studio Code as part of a new workspace creation process only.\"},{\"type\":\"function\",\"name\":\"list_dir\",\"description\":\"List the contents of a directory. Result will have the name of the child. If the name ends in /, it's a folder, otherwise a file\"},{\"type\":\"function\",\"name\":\"memory\",\"description\":\"Manage a persistent memory system with three scopes for storing notes and information across conversations.\\n\\nMemory is organized under /memories/ with three tiers:\\n- `/memories/` — User memory: persistent notes that survive across all workspaces and conversations. Store preferences, patterns, and general insights here.\\n- `/memories/session/` — Session memory: notes scoped to the current conversation. Store task-specific context and in-progress notes here. Cleared after the conversation ends.\\n- `/memories/repo/` — Repository memory: repository-scoped facts stored via Copilot. Only the `create` command is supported for this path.\\n\\nIMPORTANT: Before creating new memory files, first view the /memories/ directory to understand what already exists. This helps avoid duplicates and maintain organized notes.\\n\\nCommands:\\n- `view`: View contents of a file or list directory contents. Can be used on files or directories (e.g., \\\"/memories/\\\" to see all top-level items).\\n- `create`: Create a new file at the specified path with the given content. Fails if the file already exists.\\n- `str_replace`: Replace an exact string in a file with a new string. The old_str must appear exactly once in the file.\\n- `insert`: Insert text at a specific line number in a file. Line 0 inserts at the beginning.\\n- `delete`: Delete a file or directory (and all its contents).\\n- `rename`: Rename or move a file or directory from path to new_path. Cannot rename across scopes.\"},{\"type\":\"function\",\"name\":\"read_file\",\"description\":\"Read the contents of a file.\\n\\nYou must specify the line range you're interested in. Line numbers are 1-indexed. If the file contents returned are insufficient for your task, you may call this tool again to retrieve more content. Prefer reading larger ranges over doing many small reads. Binary files use startLine/endLine as byte offsets.\"},{\"type\":\"function\",\"name\":\"read_notebook_cell_output\",\"description\":\"This tool will retrieve the output for a notebook cell from its most recent execution or restored from disk. The cell may have output even when it has not been run in the current kernel session. This tool has a higher token limit for output length than the runNotebookCell tool.\"},{\"type\":\"function\",\"name\":\"resolve_memory_file_uri\",\"description\":\"Resolve a memory file path (like /memories/session/plan.md or /memories/repo/notes.md) to its fully qualified URI. Use this when you need the actual URI for a memory file, for example to pass it to setArtifacts. The path must start with /memories/.\"},{\"type\":\"function\",\"name\":\"run_notebook_cell\",\"description\":\"This is a tool for running a code cell in a notebook file directly in the notebook editor. The output from the execution will be returned. Code cells should be run as they are added or edited when working through a problem to bring the kernel state up to date and ensure the code executes successfully. Code cells are ready to run and don't require any pre-processing. If asked to run the first cell in a notebook, you should run the first code cell since markdown cells cannot be executed. NOTE: Avoid executing Markdown cells or providing Markdown cell IDs, as Markdown cells cannot be  executed.\"},{\"type\":\"function\",\"name\":\"run_vscode_command\",\"description\":\"Run a command in VS Code. Use this tool to run a command in Visual Studio Code as part of a new workspace creation process only.\"},{\"type\":\"function\",\"name\":\"semantic_search\",\"description\":\"Run a natural language search for relevant code or documentation comments from the user's current workspace. Returns relevant code snippets from the user's current workspace if it is large, or the full contents of the workspace if it is small.\"},{\"type\":\"function\",\"name\":\"test_failure\",\"description\":\"Includes test failure information in the prompt.\"},{\"type\":\"function\",\"name\":\"view_image\",\"description\":\"View the contents of an image file. Use this instead of read_file for supported image files such as png, jpg, jpeg, gif, and webp. The tool returns the image directly to multimodal models and does not take line ranges or offsets.\"},{\"type\":\"function\",\"name\":\"vscode_askQuestions\",\"description\":\"Use this tool to ask the user a small number of clarifying questions before proceeding. Provide the questions array with concise headers and prompts. Use options for fixed choices, set multiSelect when multiple selections are allowed. Users can always provide a freeform text answer alongside options unless you set allowFreeformInput to false.\"},{\"type\":\"function\",\"name\":\"vscode_listCodeUsages\",\"description\":\"Find all usages (references, definitions, and implementations) of a code symbol across the workspace. This tool locates where a symbol is referenced, defined, or implemented.\\n\\nInput:\\n- \\\"symbol\\\": The exact name of the symbol to search for (function, class, method, variable, type, etc.).\\n- \\\"uri\\\": A full URI (e.g. \\\"file:///path/to/file.ts\\\") of a file where the symbol appears. Provide either \\\"uri\\\" or \\\"filePath\\\".\\n- \\\"filePath\\\": A workspace-relative file path (e.g. \\\"src/utils/helpers.ts\\\") of a file where the symbol appears. Provide either \\\"uri\\\" or \\\"filePath\\\".\\n- \\\"lineContent\\\": A substring of the line of code where the symbol appears. This is used to locate the exact position in the file. Must be the actual text from the file - do NOT fabricate it.\\n\\nIMPORTANT: The file and line do NOT need to be the definition of the symbol. Any occurrence works - a usage, an import, a call site, etc. You can pick whichever occurrence is most convenient.\\n\\nIf the tool returns an error, retry with corrected input - ensure the file path is correct, the line content matches the actual file content, and the symbol name appears in that line.\\n\\nCurrently supported for: python.\"},{\"type\":\"function\",\"name\":\"vscode_renameSymbol\",\"description\":\"Rename a code symbol across the workspace using the language server's rename functionality. This performs a precise, semantics-aware rename that updates all references.\\n\\nInput:\\n- \\\"symbol\\\": The exact current name of the symbol to rename.\\n- \\\"newName\\\": The new name for the symbol.\\n- \\\"uri\\\": A full URI (e.g. \\\"file:///path/to/file.ts\\\") of a file where the symbol appears. Provide either \\\"uri\\\" or \\\"filePath\\\".\\n- \\\"filePath\\\": A workspace-relative file path (e.g. \\\"src/utils/helpers.ts\\\") of a file where the symbol appears. Provide either \\\"uri\\\" or \\\"filePath\\\".\\n- \\\"lineContent\\\": A substring of the line of code where the symbol appears. This is used to locate the exact position in the file. Must be the actual text from the file - do NOT fabricate it.\\n\\nIMPORTANT: The file and line do NOT need to be the definition of the symbol. Any occurrence works - a usage, an import, a call site, etc. You can pick whichever occurrence is most convenient.\\n\\nIf the tool returns an error, retry with corrected input - ensure the file path is correct, the line content matches the actual file content, and the symbol name appears in that line.\\n\\nCurrently supported for: python.\"},{\"type\":\"function\",\"name\":\"vscode_searchExtensions_internal\",\"description\":\"This is a tool for browsing Visual Studio Code Extensions Marketplace. It allows the model to search for extensions and retrieve detailed information about them. The model should use this tool whenever it needs to discover extensions or resolve information about known ones. To use the tool, the model has to provide the category of the extensions, relevant search keywords, or known extension IDs. Note that search results may include false positives, so reviewing and filtering is recommended.\"},{\"type\":\"function\",\"name\":\"await_terminal\",\"description\":\"Wait for a background terminal command to complete. Returns the output, exit code, or timeout status.\"},{\"type\":\"function\",\"name\":\"create_and_run_task\",\"description\":\"Creates and runs a build, run, or custom task for the workspace by generating or adding to a tasks.json file based on the project structure (such as package.json or README.md). If the user asks to build, run, launch and they have no tasks.json file, use this tool. If they ask to create or add a task, use this tool.\"},{\"type\":\"function\",\"name\":\"get_terminal_output\",\"description\":\"Get the output of a terminal command previously started with run_in_terminal\"},{\"type\":\"function\",\"name\":\"kill_terminal\",\"description\":\"Kill a terminal by its ID. Use this to clean up terminals that are no longer needed (e.g., after stopping a server or when a long-running task completes). The terminal ID is returned by run_in_terminal when isBackground=true.\"},{\"type\":\"function\",\"name\":\"manage_todo_list\",\"description\":\"Updates the task plan.\\nProvide an optional explanation and a list of plan items, each with a step and status.\\nAt most one step can be in_progress at a time.\"},{\"type\":\"function\",\"name\":\"open_browser_page\",\"description\":\"Open a new browser page in the integrated browser at the given URL.\"},{\"type\":\"function\",\"name\":\"run_in_terminal\",\"description\":\"This tool allows you to execute PowerShell commands in a persistent terminal session, preserving environment variables, working directory, and other context across multiple commands.\\n\\nCommand Execution:\\n- Prefer ; when chaining commands on one line\\n- Prefer pipelines | for object-based data flow\\n- Never create a sub-shell (eg. powershell -c \\\"command\\\") unless explicitly asked\\n\\nDirectory Management:\\n- Prefer relative paths when navigating directories, only use absolute when the path is far away or the current cwd is not expected\\n- Remember when isBackground=false is specified, that the shell and cwd are reused until it is moved to the background\\n- Use $PWD or Get-Location for current directory\\n- Use Push-Location/Pop-Location for directory stack\\n\\nProgram Execution:\\n- Supports .NET, Python, Node.js, and other executables\\n- Install modules via Install-Module, Install-Package\\n- Use Get-Command to verify cmdlet/function availability\\n\\nBackground Processes:\\n- For long-running tasks (e.g., servers), set isBackground=true\\n- Returns a terminal ID for checking status and runtime later\\n- Use Start-Job for background PowerShell jobs\\n\\nOutput Management:\\n- Output is automatically truncated if longer than 60KB to prevent context overflow\\n- Use Select-Object, Where-Object, Format-Table to filter output\\n- Use -First/-Last parameters to limit results\\n- For pager commands, add | Out-String or | Format-List\\n\\nBest Practices:\\n- Use proper cmdlet names instead of aliases in scripts\\n- Quote paths with spaces: \\\"C:\\\\Path With Spaces\\\"\\n- Prefer PowerShell cmdlets over external commands when available\\n- Prefer idiomatic PowerShell like Get-ChildItem instead of dir or ls for file listings\\n- Use Test-Path to check file/directory existence\\n- Be specific with Select-Object properties to avoid excessive output\\n- Avoid printing credentials unless absolutely required\"},{\"type\":\"function\",\"name\":\"runSubagent\",\"description\":\"Launch a new agent to handle complex, multi-step tasks autonomously. This tool is good at researching complex questions, searching for code, and executing multi-step tasks. When you are searching for a keyword or file and are not confident that you will find the right match in the first few tries, use this agent to perform the search for you.\\n\\n- Agents do not run async or in the background, you will wait for the agent's result.\\n- When the agent is done, it will return a single message back to you. The result returned by the agent is not visible to the user. To show the user the result, you should send a text message back to the user with a concise summary of the result.\\n- Each agent invocation is stateless. You will not be able to send additional messages to the agent, nor will the agent be able to communicate with you outside of its final report. Therefore, your prompt should contain a highly detailed task description for the agent to perform autonomously and you should specify exactly what information the agent should return back to you in its final and only message to you.\\n- The agent's outputs should generally be trusted\\n- Clearly tell the agent whether you expect it to write code or just to do research (search, file reads, web fetches, etc.), since it is not aware of the user's intent\\n- If the user asks for a certain agent, you MUST provide that EXACT agent name (case-sensitive) to invoke that specific agent.\"},{\"type\":\"function\",\"name\":\"terminal_last_command\",\"description\":\"Get the last command run in the active terminal.\"},{\"type\":\"function\",\"name\":\"terminal_selection\",\"description\":\"Get the current selection in the active terminal.\"},{\"type\":\"function\",\"name\":\"activate_notebook_kernel_configuration\",\"description\":\"Call this tool when you need access to a new category of tools. The category of tools is described as follows:\\n\\nThis group of tools is focused on configuring the execution environment for Jupyter notebooks by selecting and starting the appropriate kernel. The 'configure_non_python_notebook' tool allows users to select and initiate a kernel for notebooks that do not use Python, accommodating various programming languages and environments. Conversely, the 'configure_python_notebook' tool is specifically designed for Python notebooks, ensuring that the correct Python kernel is selected and started for executing Python code. Together, these tools enable users to set up their notebooks for the desired programming language, facilitating a seamless coding experience across different environments.\\n\\nBe sure to call this tool if you need a capability related to the above.\"},{\"type\":\"function\",\"name\":\"activate_notebook_package_management\",\"description\":\"Call this tool when you need access to a new category of tools. The category of tools is described as follows:\\n\\nThis group of tools is dedicated to managing packages within Jupyter notebooks that utilize Python code cells. The 'notebook_install_packages' tool allows users to install a specified list of packages directly into the currently selected notebook kernel, ensuring that all necessary libraries are available for the code being executed. It is important to use this tool only after configuring the notebook with the appropriate kernel using the configuration tools. The 'notebook_list_packages' tool complements this functionality by providing a way to list all currently installed packages in the selected kernel, allowing users to verify the availability of required libraries before running their code. Together, these tools streamline the process of package management in Jupyter notebooks, enhancing the development workflow for Python programming.\\n\\nBe sure to call this tool if you need a capability related to the above.\"},{\"type\":\"function\",\"name\":\"configure_notebook\",\"description\":\"Tool used to configure a Notebook. ALWAYS use this tool before running/executing any Notebook Cells for the first time or before listing/installing packages in Notebooks for the first time. I.e. there is no need to use this tool more than once for the same notebook.\"},{\"type\":\"function\",\"name\":\"restart_notebook_kernel\",\"description\":\"Tool used to restart a Notebook kernel. Some packages require a restart of the kernel after being installed. Use this if after installing a package if you know the package requires a restart, or if still getting an error about a missing package after installing.\"},{\"type\":\"function\",\"name\":\"configure_python_environment\",\"description\":\"This tool configures a Python environment in the given workspace. ALWAYS Use this tool to set up the user's chosen environment and ALWAYS call this tool before using any other Python related tools or running any Python command in the terminal. IMPORTANT: This tool is only for Python environments (venv, virtualenv, conda, pipenv, poetry, pyenv, pixi, or any other Python environment manager). Do not use this tool for npm packages, system packages, Ruby gems, or any other non-Python dependencies.\"},{\"type\":\"function\",\"name\":\"get_python_environment_details\",\"description\":\"This tool will retrieve the details of the Python Environment for the specified file or workspace. The details returned include the 1. Type of Python Environment (conda, venv, etc), 2. Version of Python, 3. List of all installed Python packages with their versions. ALWAYS call configure_python_environment before using this tool. IMPORTANT: This tool is only for Python environments (venv, virtualenv, conda, pipenv, poetry, pyenv, pixi, or any other Python environment manager). Do not use this tool for npm packages, system packages, Ruby gems, or any other non-Python dependencies.\"},{\"type\":\"function\",\"name\":\"get_python_executable_details\",\"description\":\"This tool will retrieve the details of the Python Environment for the specified file or workspace. ALWAYS use this tool before executing any Python command in the terminal. This tool returns the details of how to construct the fully qualified path and or command including details such as arguments required to run Python in a terminal. Note: Instead of executing `python --version` or `python -c 'import sys; print(sys.executable)'`, use this tool to get the Python executable path to replace the `python` command. E.g. instead of using `python -c 'import sys; print(sys.executable)'`, use this tool to build the command `conda run -n <env_name> -c 'import sys; print(sys.executable)'`. ALWAYS call configure_python_environment before using this tool. IMPORTANT: This tool is only for Python environments (venv, virtualenv, conda, pipenv, poetry, pyenv, pixi, or any other Python environment manager). Do not use this tool for npm packages, system packages, Ruby gems, or any other non-Python dependencies.\"},{\"type\":\"function\",\"name\":\"install_python_packages\",\"description\":\"Installs Python packages in the given workspace. Use this tool to install Python packages in the user's chosen Python environment. ALWAYS call configure_python_environment before using this tool. IMPORTANT: This tool should only be used to install Python packages using package managers like pip or conda (works with any Python environment: venv, virtualenv, pipenv, poetry, pyenv, pixi, conda, etc.). Do not use this tool to install npm packages, system packages (apt/brew/yum), Ruby gems, or any other non-Python dependencies.\"},{\"type\":\"function\",\"name\":\"evaluateExpressionInDebugSession\",\"description\":\"Evaluate an expression in a specific debug session\"},{\"type\":\"function\",\"name\":\"listDebugSessions\",\"description\":\"List all active debug sessions with their IDs, names, and expression language IDs\"},{\"type\":\"function\",\"name\":\"activate_pull_request_review_tools\",\"description\":\"Call this tool when you need access to a new category of tools. The category of tools is described as follows:\\n\\nThis group of tools is focused on managing pull request reviews within GitHub repositories. Users can add comments to pending reviews, create new reviews, submit existing reviews, or delete pending reviews. The tools facilitate interaction with pull requests by allowing users to comment on issues or pull requests, ensuring that feedback can be provided effectively. These tools are essential for collaborative coding environments where multiple developers review and provide input on code changes before they are merged into the main codebase.\\n\\nBe sure to call this tool if you need a capability related to the above.\"},{\"type\":\"function\",\"name\":\"activate_pull_request_management_tools\",\"description\":\"Call this tool when you need access to a new category of tools. The category of tools is described as follows:\\n\\nThis collection of tools is designed for creating and managing pull requests in GitHub repositories. Users can create new branches, initiate pull requests, and even delegate tasks to GitHub Copilot for automated code implementation. Additionally, the tools allow for listing existing pull requests and merging them once they have been reviewed. This group is crucial for developers looking to streamline their workflow, enhance collaboration, and ensure that code changes are properly reviewed and integrated into projects.\\n\\nBe sure to call this tool if you need a capability related to the above.\"},{\"type\":\"function\",\"name\":\"activate_file_management_tools\",\"description\":\"Call this tool when you need access to a new category of tools. The category of tools is described as follows:\\n\\nThis group provides essential file management capabilities within GitHub repositories. Users can retrieve the contents of files or directories and delete files as needed. These tools are vital for maintaining the integrity of a codebase, allowing developers to manage files effectively, whether they need to remove outdated files or access specific content for review or modification. Together, these tools enable efficient file handling and contribute to a well-organized repository.\\n\\nBe sure to call this tool if you need a capability related to the above.\"},{\"type\":\"function\",\"name\":\"activate_repository_information_tools\",\"description\":\"Call this tool when you need access to a new category of tools. The category of tools is described as follows:\\n\\nThis set of tools is focused on retrieving various types of information from GitHub repositories. Users can access details about commits, labels, releases, and issues, as well as information about their own GitHub profile. These tools are essential for developers who need to gather insights about the state of a repository, track changes, and manage issues effectively. By providing comprehensive access to repository data, these tools support informed decision-making and enhance project management.\\n\\nBe sure to call this tool if you need a capability related to the above.\"},{\"type\":\"function\",\"name\":\"activate_release_management_tools\",\"description\":\"Call this tool when you need access to a new category of tools. The category of tools is described as follows:\\n\\nThis group of tools is dedicated to managing releases within GitHub repositories. Users can retrieve specific releases by tag name and list all available tags. These tools are important for developers who need to track versioning and manage the deployment of software. By utilizing these tools, teams can ensure that they are working with the correct versions of their code and can easily access historical releases for reference or rollback purposes.\\n\\nBe sure to call this tool if you need a capability related to the above.\"},{\"type\":\"function\",\"name\":\"activate_search_and_discovery_tools\",\"description\":\"Call this tool when you need access to a new category of tools. The category of tools is described as follows:\\n\\nThis collection of tools is designed for searching and discovering content across GitHub. Users can search for code, repositories, and users, making it easier to locate specific projects, find collaborators, or explore code patterns. These tools enhance the ability to navigate the vast amount of information available on GitHub, allowing developers to quickly find relevant resources and connect with other contributors. This group is essential for fostering collaboration and improving productivity in software development.\\n\\nBe sure to call this tool if you need a capability related to the above.\"},{\"type\":\"function\",\"name\":\"activate_branch_and_commit_tools\",\"description\":\"Call this tool when you need access to a new category of tools. The category of tools is described as follows:\\n\\nThis group focuses on managing branches and commits within GitHub repositories. Users can list branches and retrieve commit histories for specific branches, providing insights into the development process and changes made over time. These tools are crucial for developers who need to track progress, understand the evolution of their code, and manage multiple lines of development. By utilizing these tools, teams can maintain a clear overview of their project’s history and ensure effective collaboration across different branches.\\n\\nBe sure to call this tool if you need a capability related to the above.\"},{\"type\":\"function\",\"name\":\"mcp_github_assign_copilot_to_issue\",\"description\":\"Assign Copilot to a specific issue in a GitHub repository.\\n\\nThis tool can help with the following outcomes:\\n- a Pull Request created with source code changes to resolve the issue\\n\\n\\nMore information can be found at:\\n- https://docs.github.com/en/copilot/using-github-copilot/using-copilot-coding-agent-to-work-on-tasks/about-assigning-tasks-to-copilot\\n\"},{\"type\":\"function\",\"name\":\"mcp_github_create_or_update_file\",\"description\":\"Create or update a single file in a GitHub repository. \\nIf updating, you should provide the SHA of the file you want to update. Use this tool to create or update a file in a GitHub repository remotely; do not use it for local file operations.\\n\\nIn order to obtain the SHA of original file version before updating, use the following git command:\\ngit rev-parse <branch>:<path to file>\\n\\nSHA MUST be provided for existing file updates.\\n\"},{\"type\":\"function\",\"name\":\"mcp_github_fork_repository\",\"description\":\"Fork a GitHub repository to your account or specified organization\"},{\"type\":\"function\",\"name\":\"mcp_github_get_copilot_job_status\",\"description\":\"Get the status of a GitHub Copilot coding agent job. Use this to check if a previously submitted task has completed and to get the pull request URL once it's created. Provide the job ID (from create_pull_request_with_copilot) or pull request number (from assign_copilot_to_issue), or any pull request you want agent sessions for.\"},{\"type\":\"function\",\"name\":\"mcp_github_get_teams\",\"description\":\"Get details of the teams the user is a member of. Limited to organizations accessible with current credentials\"},{\"type\":\"function\",\"name\":\"mcp_github_push_files\",\"description\":\"Push multiple files to a GitHub repository in a single commit\"},{\"type\":\"function\",\"name\":\"mcp_github_run_secret_scanning\",\"description\":\"Scan files, content, or recent changes for secrets such as API keys, passwords, tokens, and credentials.\\n\\nThis tool is intended for targeted scans of specific files, snippets, or diffs provided directly as content. It accepts file contents or diffs and returns detected secrets with their locations and related secret scanning metadata. Content must not be empty. For full repository scanning, other mechanisms are available.\\n\\nCaveats:\\n\\n- Only files within the codebase should be scanned. Files outside of the codebase should not be sent.\\n- Files listed in .gitignore should be skipped.\"},{\"type\":\"function\",\"name\":\"mcp_github_search_pull_requests\",\"description\":\"Search for pull requests in GitHub repositories using issues search syntax already scoped to is:pr\"},{\"type\":\"function\",\"name\":\"activate_git_branch_management_tools\",\"description\":\"Call this tool when you need access to a new category of tools. The category of tools is described as follows:\\n\\nThis group of tools is focused on managing Git branches and worktrees, providing essential functionalities for version control in software development. The tools allow users to list or create branches, switch between them, and restore files in the working tree. By using 'git branch', developers can effectively manage their project's branching strategy, while 'git checkout' enables them to navigate between different branches seamlessly. Additionally, 'git log' and 'git diff' provide insights into commit history and changes, which are crucial for understanding project evolution and debugging. The 'git status' tool helps users keep track of their working tree's state, ensuring they are aware of any uncommitted changes. Lastly, the ability to manage worktrees with 'git worktree' allows for more flexible development workflows, enabling multiple branches to be checked out simultaneously in different directories. Together, these tools streamline the branching and version control process, enhancing collaboration and productivity in software projects.\\n\\nBe sure to call this tool if you need a capability related to the above.\"},{\"type\":\"function\",\"name\":\"activate_pull_request_management_tools_2\",\"description\":\"Call this tool when you need access to a new category of tools. The category of tools is described as follows:\\n\\nThis group of tools is designed to enhance the workflow around pull requests (PRs) and commit organization. The 'Gitlens Commit Composer' allows users to structure their changes into well-defined commits, which is particularly useful for breaking down large changes into manageable pieces with clear messages. The 'Gitlens Launchpad' prioritizes open pull requests based on their status, helping users focus on what needs attention, whether it's merging, resolving conflicts, or awaiting review. The 'Gitlens Start Review' tool creates a dedicated worktree for reviewing PRs with the assistance of an AI agent, streamlining the review process. Additionally, the 'Gitlens Start Work' tool facilitates the creation of branches linked to specific issues, ensuring that context is maintained throughout the development process. Finally, the 'Create a review for a pull request' tool allows users to initiate formal reviews, ensuring that code quality and collaboration are upheld. Collectively, these tools provide a robust framework for managing pull requests and improving collaboration within development teams.\\n\\nBe sure to call this tool if you need a capability related to the above.\"},{\"type\":\"function\",\"name\":\"activate_pull_request_commenting_tools\",\"description\":\"Call this tool when you need access to a new category of tools. The category of tools is described as follows:\\n\\nThis group of tools is designed to facilitate interaction with pull requests in GitKraken, specifically focusing on commenting functionalities. The tools allow users to add comments to issues and pull requests, fostering communication and collaboration among team members during the code review process. By using 'add comment to an issue', developers can provide feedback or ask questions directly related to specific tasks or bugs. The ability to retrieve all comments in a pull request through 'get comments in a pull request' enables users to review discussions and decisions made during the review process. Additionally, 'get specific pull request' allows users to access detailed information about a particular pull request, including its status and associated comments. Together, these tools enhance the collaborative aspect of code reviews, ensuring that all team members can contribute to discussions and maintain a clear understanding of the code changes being proposed.\\n\\nBe sure to call this tool if you need a capability related to the above.\"},{\"type\":\"function\",\"name\":\"activate_personal_issue_and_pull_request_management_tools\",\"description\":\"Call this tool when you need access to a new category of tools. The category of tools is described as follows:\\n\\nThis group of tools is tailored for individual developers to manage their assigned issues and pull requests within GitKraken. The tools provide functionalities to fetch issues that are specifically assigned to the user, allowing them to prioritize their workload effectively. By using 'fetch issues assigned to me', developers can quickly identify tasks that require their attention, ensuring that they stay organized and focused on their responsibilities. Similarly, the tools enable users to search for pull requests where they are the assignee, author, or reviewer, streamlining the process of tracking their contributions and responsibilities in collaborative projects. This targeted approach to managing issues and pull requests helps developers maintain clarity in their tasks and enhances their ability to contribute effectively to team efforts. Overall, these tools empower individual developers to take charge of their work, ensuring that they can efficiently navigate their assigned tasks and participate in the code review process.\\n\\nBe sure to call this tool if you need a capability related to the above.\"},{\"type\":\"function\",\"name\":\"mcp_gitkraken_git_add_or_commit\",\"description\":\"Add file contents to the index (git add <pathspec>) OR record changes to the repository (git commit -m <message> [files...]). Use the 'action' parameter to specify which action to perform.\"},{\"type\":\"function\",\"name\":\"mcp_gitkraken_git_blame\",\"description\":\"Show what revision and author last modified each line of a file (git blame <file>).\"},{\"type\":\"function\",\"name\":\"mcp_gitkraken_git_push\",\"description\":\"Update remote refs along with associated objects (git push).\"},{\"type\":\"function\",\"name\":\"mcp_gitkraken_git_stash\",\"description\":\"Stash the changes in a dirty working directory (git stash).\"},{\"type\":\"function\",\"name\":\"renderMermaidDiagram\",\"description\":\"Renders a Mermaid diagram from Mermaid.js markup.\"},{\"type\":\"function\",\"name\":\"mcp_github_issue_write\",\"description\":\"Create a new or update an existing issue in a GitHub repository.\"},{\"type\":\"function\",\"name\":\"mcp_gitkraken_issues_add_comment\",\"description\":\"Add a comment to an issue\"},{\"type\":\"function\",\"name\":\"mcp_gitkraken_pull_request_create\",\"description\":\"Create a new pull request\"},{\"type\":\"function\",\"name\":\"mcp_gitkraken_repository_get_file_content\",\"description\":\"Get file content from a repository\"},{\"type\":\"function\",\"name\":\"mcp_github_sub_issue_write\",\"description\":\"Add a sub-issue to a parent issue in a GitHub repository.\"},{\"type\":\"function\",\"name\":\"mcp_gitkraken_gitlens_commit_composer\",\"description\":\" Gitlens Commit Composer. Organize your changes into well-formed commits with clear messages and descriptions. Useful for breaking large changes into smaller commits.\"},{\"type\":\"function\",\"name\":\"mcp_gitkraken_gitlens_start_work\",\"description\":\" Gitlens Start Work. Creates a work based on an issue. This tool will create a branch and link it with the issue, keeping context visible throughout your work.\"}]"
+                  }
+                }
+              ],
+              "events": [
+                {
+                  "timeUnixNano": "1774707161670000000",
+                  "name": "user_message",
+                  "attributes": [
+                    {
+                      "key": "content",
+                      "value": {
+                        "stringValue": "please create a file - a.txt with content abc"
+                      }
+                    },
+                    {
+                      "key": "copilot_chat.chat_session_id",
+                      "value": {
+                        "stringValue": "fffe2648-51cb-4458-ab35-e593a94d6191"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "status": {
+                "code": 1
+              }
+            },
+            {
+              "traceId": "00000000000000000000000000000004",
+              "spanId": "1a6b70c1-cb34-4b41-b23c-d5ceac54ca66",
+              "name": "Load Instructions",
+              "kind": 1,
+              "startTimeUnixNano": "1774707157489000000",
+              "endTimeUnixNano": "1774707157489000000",
+              "attributes": [
+                {
+                  "key": "copilot_chat.source",
+                  "value": {
+                    "stringValue": "core"
+                  }
+                },
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "core_event"
+                  }
+                },
+                {
+                  "key": "copilot_chat.debug_name",
+                  "value": {
+                    "stringValue": "Load Instructions"
+                  }
+                },
+                {
+                  "key": "copilot_chat.event_details",
+                  "value": {
+                    "stringValue": "Resolved 0 instructions in 0.0ms | folders: [/c:/Users/lsheng2/.copilot/instructions, /c:/Users/lsheng2/.claude/rules, /C:/Users/lsheng2/AppData/Roaming/Code/User/prompts]"
+                  }
+                },
+                {
+                  "key": "copilot_chat.event_category",
+                  "value": {
+                    "stringValue": "discovery"
+                  }
+                },
+                {
+                  "key": "copilot_chat.log_level",
+                  "value": {
+                    "intValue": "1"
+                  }
+                }
+              ],
+              "events": [],
+              "status": {
+                "code": 0
+              }
+            },
+            {
+              "traceId": "00000000000000000000000000000004",
+              "spanId": "23032db6-eb43-4865-8dd8-a648f0e9c550",
+              "name": "Load Hooks",
+              "kind": 1,
+              "startTimeUnixNano": "1774707157579000000",
+              "endTimeUnixNano": "1774707157579000000",
+              "attributes": [
+                {
+                  "key": "copilot_chat.source",
+                  "value": {
+                    "stringValue": "core"
+                  }
+                },
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "core_event"
+                  }
+                },
+                {
+                  "key": "copilot_chat.debug_name",
+                  "value": {
+                    "stringValue": "Load Hooks"
+                  }
+                },
+                {
+                  "key": "copilot_chat.event_details",
+                  "value": {
+                    "stringValue": "Resolved 0 hooks in 4.0ms | folders: [/c:/Users/lsheng2/.copilot/hooks, /c:/Users/lsheng2/.claude/settings.json]"
+                  }
+                },
+                {
+                  "key": "copilot_chat.event_category",
+                  "value": {
+                    "stringValue": "discovery"
+                  }
+                },
+                {
+                  "key": "copilot_chat.log_level",
+                  "value": {
+                    "intValue": "1"
+                  }
+                }
+              ],
+              "events": [],
+              "status": {
+                "code": 0
+              }
+            },
+            {
+              "traceId": "00000000000000000000000000000004",
+              "spanId": "6ce3f626-1213-46bd-b3c8-be7292648516",
+              "name": "Load Agents",
+              "kind": 1,
+              "startTimeUnixNano": "1774707157594000000",
+              "endTimeUnixNano": "1774707157594000000",
+              "attributes": [
+                {
+                  "key": "copilot_chat.source",
+                  "value": {
+                    "stringValue": "core"
+                  }
+                },
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "core_event"
+                  }
+                },
+                {
+                  "key": "copilot_chat.debug_name",
+                  "value": {
+                    "stringValue": "Load Agents"
+                  }
+                },
+                {
+                  "key": "copilot_chat.event_details",
+                  "value": {
+                    "stringValue": "Resolved 3 agents in 0.0ms | loaded: [Plan, Ask, Explore] | folders: [/c:/Users/lsheng2/.claude/agents, /c:/Users/lsheng2/.copilot/agents, /C:/Users/lsheng2/AppData/Roaming/Code/User/prompts]"
+                  }
+                },
+                {
+                  "key": "copilot_chat.event_category",
+                  "value": {
+                    "stringValue": "discovery"
+                  }
+                },
+                {
+                  "key": "copilot_chat.log_level",
+                  "value": {
+                    "intValue": "1"
+                  }
+                }
+              ],
+              "events": [],
+              "status": {
+                "code": 0
+              }
+            },
+            {
+              "traceId": "00000000000000000000000000000004",
+              "spanId": "f4c0d82a-cf09-4174-9b16-9bfea7d3854e",
+              "name": "Load Skills",
+              "kind": 1,
+              "startTimeUnixNano": "1774707158219000000",
+              "endTimeUnixNano": "1774707158219000000",
+              "attributes": [
+                {
+                  "key": "copilot_chat.source",
+                  "value": {
+                    "stringValue": "core"
+                  }
+                },
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "core_event"
+                  }
+                },
+                {
+                  "key": "copilot_chat.debug_name",
+                  "value": {
+                    "stringValue": "Load Skills"
+                  }
+                },
+                {
+                  "key": "copilot_chat.event_details",
+                  "value": {
+                    "stringValue": "Resolved 5 skills in 0.0ms | loaded: [beautiful-mermaid, drawio, find-skills, agent-customization, troubleshoot] | folders: [/c:/Users/lsheng2/.copilot/skills, /c:/Users/lsheng2/.agents/skills, /c:/Users/lsheng2/.claude/skills]"
+                  }
+                },
+                {
+                  "key": "copilot_chat.event_category",
+                  "value": {
+                    "stringValue": "discovery"
+                  }
+                },
+                {
+                  "key": "copilot_chat.log_level",
+                  "value": {
+                    "intValue": "1"
+                  }
+                }
+              ],
+              "events": [],
+              "status": {
+                "code": 0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "copilotChat": {
+    "exportedAt": "2026-03-28T14:13:48.387Z",
+    "exporterVersion": "",
+    "sessionId": "fffe2648-51cb-4458-ab35-e593a94d6191",
+    "sessionTitle": "Creating a text file with specific content"
+  }
+}

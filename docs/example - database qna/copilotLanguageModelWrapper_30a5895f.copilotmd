@@ -1,0 +1,151 @@
+> 🚨 Note: This log may contain personal information such as the contents of your files or terminal output. Please review the contents carefully before sharing.
+# copilotLanguageModelWrapper - 30a5895f
+
+- [Request Messages](#request-messages)
+  - [System](#system)
+  - [User](#user)
+- [Response](#response)
+
+## Metadata
+<pre><code>
+requestType      : ChatCompletions
+model            : gpt-4o-mini
+maxPromptTokens  : 12285
+maxResponseTokens: 4096
+location         : 6
+otherOptions     : {"temperature":0.1,"stream":true}
+intent           : undefined
+startTime        : 2026-03-29T05:34:48.640Z
+endTime          : 2026-03-29T05:34:49.205Z
+duration         : 565ms
+ourRequestId     : d10e4d8f-a2de-417e-b74c-6552bafd3702
+requestId        : d10e4d8f-a2de-417e-b74c-6552bafd3702
+serverRequestId  : d10e4d8f-a2de-417e-b74c-6552bafd3702
+timeToFirstToken : 461ms
+resolved model   : gpt-4o-mini-2024-07-18
+usage            : {"completion_tokens":12,"completion_tokens_details":{"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"prompt_tokens":1768,"prompt_tokens_details":{"cached_tokens":1536},"total_tokens":1780,"reasoning_tokens":0}
+</code></pre>
+## Request Messages
+### System
+~~~md
+Follow Microsoft content policies.
+Avoid content that violates copyrights.
+If you are asked to generate content that is harmful, hateful, racist, sexist, lewd, or violent, only respond with "Sorry, I can't assist with that."
+Keep your answers short and impersonal.
+Use Markdown formatting in your answers.
+Make sure to include the programming language name at the start of the Markdown code blocks.
+Avoid wrapping the whole response in triple backticks.
+Use KaTeX for math equations in your answers.
+Wrap inline math equations in $.
+Wrap more complex blocks of math equations in $$.
+The user works in an IDE called Visual Studio Code which has a concept for editors with open files, integrated unit test support, an output pane that shows the output of running the code as well as an integrated terminal.
+The active document is the source code the user is looking at right now.
+You can only give one reply for each conversation turn.
+
+
+~~~
+
+### User
+~~~md
+Summarize the following content in a SINGLE sentence (under 10 words) using past tense. Follow these rules strictly:
+
+			OUTPUT FORMAT:
+			- MUST be a single sentence
+			- MUST be under 10 words
+			- The FIRST word MUST be a past tense verb (e.g. "Updated", "Reviewed", "Created", "Searched", "Analyzed")
+			- No quotes, no trailing punctuation
+
+			GENERAL:
+			- The content may include tool invocations (file edits, reads, searches, terminal commands), reasoning headers, or raw thinking text
+			- For reasoning headers or thinking text (no tool calls), summarize WHAT was considered/analyzed, NOT that thinking occurred
+			- For thinking-only summaries, use phrases like: "Considered...", "Planned...", "Analyzed...", "Reviewed..."
+
+			TOOL NAME FILTERING:
+			- NEVER include tool names like "Replace String in File", "Multi Replace String in File", "Create File", "Read File", etc. in the output
+			- If an action says "Edited X and used Replace String in File", output ONLY the action on X
+			- Tool names describe HOW something was done, not WHAT was done - always omit them
+
+			VOCABULARY - Use varied synonyms for natural-sounding summaries:
+			- For edits: "Updated", "Modified", "Changed", "Refactored", "Fixed", "Adjusted"
+			- For reads: "Reviewed", "Examined", "Checked", "Inspected", "Analyzed", "Explored"
+			- For creates: "Created", "Added", "Generated"
+			- For searches: "Searched for", "Looked up", "Investigated"
+			- For terminal: "Ran command", "Executed"
+			- For reasoning/thinking: "Considered", "Planned", "Analyzed", "Reviewed", "Evaluated"
+			- Choose the synonym that best fits the context
+
+IMPORTANT: Do NOT use words like "blocked", "denied", or "tried" in the summary - there are no hooks or blocked items in this content. Just summarize normally.
+
+			RULES FOR TOOL CALLS:
+			1. If the SAME file was both edited AND read: Use a combined phrase like "Reviewed and updated <filename>"
+			2. If exactly ONE file was edited: Start with an edit synonym + "<filename>" (include actual filename)
+			3. If exactly ONE file was read: Start with a read synonym + "<filename>" (include actual filename)
+			4. If MULTIPLE files were edited: Start with an edit synonym + "X files"
+			5. If MULTIPLE files were read: Start with a read synonym + "X files"
+			6. If BOTH edits AND reads occurred on DIFFERENT files: Combine them naturally
+			7. For searches: Say "searched for <term>" or "looked up <term>" with the actual search term, NOT "searched for files"
+			8. After the file info, you may add a brief summary of other actions if space permits
+			9. NEVER say "1 file" - always use the actual filename when there's only one file
+
+			RULES FOR REASONING HEADERS (no tool calls):
+			1. If the input contains reasoning/analysis headers without actual tool invocations, summarize the main topic and what was considered
+			2. Use past tense verbs that indicate thinking, not doing: "Considered", "Planned", "Analyzed", "Evaluated"
+			3. Focus on WHAT was being thought about, not that thinking occurred
+
+			RULES FOR RAW THINKING TEXT:
+			1. Extract the main topic or question being considered from the text
+			2. Identify any specific files, functions, or concepts mentioned
+			3. Summarize as "Analyzed <topic>" or "Considered <specific thing>"
+			4. If discussing code structure: "Reviewed <component/architecture>"
+			5. If discussing a problem: "Analyzed <problem description>"
+			6. If discussing implementation: "Planned <feature/change>"
+
+			EXAMPLES WITH TOOLS:
+			- "Read HomePage.tsx, Edited HomePage.tsx" → "Reviewed and updated HomePage.tsx"
+			- "Edited HomePage.tsx" → "Updated HomePage.tsx"
+			- "Edited config.css and used Replace String in File" → "Modified config.css"
+			- "Edited App.tsx, used Multi Replace String in File" → "Refactored App.tsx"
+			- "Read config.json, Read package.json" → "Reviewed 2 files"
+			- "Edited App.tsx, Read utils.ts" → "Updated App.tsx and checked utils.ts"
+			- "Edited App.tsx, Read utils.ts, Read types.ts" → "Updated App.tsx and reviewed 2 files"
+			- "Edited index.ts, Edited styles.css, Ran terminal command" → "Modified 2 files and ran command"
+			- "Read README.md, Searched for AuthService" → "Checked README.md and searched for AuthService"
+			- "Searched for login, Searched for authentication" → "Searched for login and authentication"
+			- "Edited api.ts, Edited models.ts, Read schema.json" → "Updated 2 files and reviewed schema.json"
+			- "Edited Button.tsx, Edited Button.css, Edited index.ts" → "Modified 3 files"
+			- "Searched codebase for error handling" → "Looked up error handling"
+
+EXAMPLES WITH REASONING HEADERS (no tools):
+			- "Analyzing component architecture" → "Considered component architecture"
+			- "Planning refactor strategy" → "Planned refactor strategy"
+			- "Reviewing error handling approach, Considering edge cases" → "Analyzed error handling approach"
+			- "Understanding the codebase structure" → "Reviewed codebase structure"
+			- "Thinking about implementation options" → "Considered implementation options"
+
+			EXAMPLES WITH RAW THINKING TEXT:
+			- "I need to understand how the authentication flow works in this app..." → "Analyzed authentication flow"
+			- "Let me think about how to refactor this component to be more maintainable..." → "Planned component refactoring"
+			- "The error seems to be coming from the database connection..." → "Investigated database connection issue"
+			- "Looking at the UserService class, I see it handles..." → "Reviewed UserService implementation"
+
+			Content: Reading [](file:///d%3A/AIGC/vscode-copilot-chat_my/src/extension/intents/node/agentIntent.ts#366-366), lines 366 to 650, Searching for regex `executeStopHook|shouldContinue|hook blocked|stop hook blocked` (`**/src/extension/intents/test/node/toolCallingLoopHooks.spec.ts`), Reading [](file:///d%3A/AIGC/vscode-copilot-chat_my/src/extension/intents/test/node/toolCallingLoopHooks.spec.ts#760-760), lines 760 to 980, Searching for regex `yieldRequested|toolCallLimit < 200|Auto-retrying|autopilot internal stop hook` (`**/src/extension/intents/node/toolCallingLoop.ts`), Considering formatting rules
+~~~
+
+
+
+## Response
+### Assistant
+~~~md
+Reviewed agentIntent.ts and toolCallingLoopHooks.spec.ts
+~~~
+
+
+<style>
+[id^="system"], [id^="user"], [id^="assistant"] {
+		margin: 4px 0 4px 0;
+}
+
+.markdown-body > pre {
+		padding: 4px 16px;
+}
+</style>

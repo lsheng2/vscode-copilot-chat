@@ -8,6 +8,8 @@
 
 本文的写法刻意同时覆盖两类阅读目标：一类是先建立全局认知，理解 Agent Mode 为什么存在、在系统里处于什么位置；另一类是直接进入实现细节，理解分层、职责边界与关键代码入口。
 
+本文也刻意吸收了两个已经过源码和导出物反复校验的真实样本：一个是最小的 `hello`，一个是会真正展开多轮工具执行的 `create-file`。它们在本文里不是“必须先看的前置阅读”，而是用来校准架构边界的证据锚点。
+
 如果是第一次接触这些概念，可以先带着以下对照关系进入阅读：
 
 - **Agent**：像一个会自己规划步骤并推动任务落地的技术负责人
@@ -46,6 +48,23 @@ Agent Mode 的设计原则可以概括为四点：
 | 从“单轮对话”升级为“多轮闭环” | 做一步，看一步，再决定下一步 | 每一轮都基于最新工具结果重建 prompt |
 | 从“单体代理”升级为“主代理 + 条件子代理” | 大任务可以拆给专门小组 | 在模型与实验开关允许时支持 search subagent 和 execution subagent |
 | 从“黑盒输出”升级为“可追踪执行” | 不只知道结果，还知道过程 | transcript、telemetry、trajectory 全部保留 |
+
+### 2.1 用三个校准样本校准架构理解
+
+只读源码时，最容易把 Agent Mode 误读成两个极端之一：
+
+1. 只要进了 Agent，就一定会出现一长串显式 tool call
+2. 只要看到了 `cached tokens`、todo read 或 mode 文本，就已经发生了完整多轮自治执行
+
+把这两个误解压住，最有效的办法是同时看三个已经校验过的校准样本：
+
+| 校准样本 | 真正发生了什么 | 对架构理解的约束 |
+| --- | --- | --- |
+| [`hello` 最小样本](./example%20-%20chat%20with%20simple%20hello/hello-agent-panel-case-study.md) | 请求已经走进 `editsAgent -> Intent.Agent -> DefaultIntentRequestHandler -> DefaultToolCallingLoop` 这条 Agent 主骨架，但模型在首轮就判断 greeting 不需要 tools；debug 面板出现的 `manage_todo_list(read)` 更像 `TodoListContextPrompt` 触发的 prompt 组装期上下文探测，而不是模型主动规划出的第一步 | 说明“进入 Agent 骨架”不等于“必须展开可见多轮工具回合”；也说明 intent 路由和 `modeInstructions2` 注入是分层机制，前者先决定车道，后者再补 prompt 约束 |
+| [`create-file` 满载样本](./example%20-%20create%20a%20file/create-file-agent-panel-case-study.md) | 同样从 Agent 主骨架进入，但真实展开成 5 轮模型调用、4 次工具执行、3 次 approval；同时出现 provider 侧 cache read 与 Responses API continuation 语义 | 说明 Agent 的本体是“目标驱动的多轮受控闭环”；approval 插在工具层，不插在最终自然语言回答层；`cached tokens` 也不能被简单等同成“已经发生 continuation” |
+| [`database qna` 研究型样本](./example%20-%20database%20qna/agent-mode-codebase-qa-case-study.md) | 主代理围绕大代码库问题连续做 `Codebase` 预取、`grep_search`、`read_file`、可选子代理委派与观测层对齐；真实链路证明复杂问题也可能长期停留在主代理研究 loop，而不是一上来就下放给 `SearchSubagent` | 说明复杂任务不只等于“编辑 + 执行”；`Codebase` 预取、`searchSubagent`、`runSubagent`、trajectory/request logger 分属不同层；也说明大代码库 Q&A 更像分层检索与多轮收敛，而不是单一 RAG |
+
+一句话收束：`hello` 校准最小骨架，`create-file` 校准满载闭环，`database qna` 校准研究型主链与子代理边界；三者合起来才是 Agent Mode 的稳定架构边界。
 
 ---
 
@@ -122,6 +141,8 @@ flowchart TD
 
 所以，至少在 Agent Mode 这条主路径里，**intent selection 是 pre-LLM orchestration，不是 LLM-driven arbitration**。
 
+`hello` 样本把这件事又校准得更具体了一层：UI、debug 面板和 raw request 里可能同时出现 `panel/editAgent`、`modeInstructions2`、`location = 7` 这几种不同形状的线索，但它们说的是同一条请求在不同层的表征，不是“代码先选了一次 intent，模型又选了第二次 intent”。在运行时里，先发生的是 participant / location / intent 路由，后发生的才是 `modeInstructions2`、todo probe、prompt discovery 这些 prompt 组装阶段的输入。
+
 源码里的决定链可以直接拆成三步。
 
 第一步：participant 入口先给出默认 intent。
@@ -170,6 +191,8 @@ flowchart TD
 
 这也是为什么上篇一直把 intent 放在 orchestration / strategy 侧，而不是放在 prompt 或 loop 内部。它在架构位置上更像“执行协议选择器”，而不是“模型运行中自发涌现出来的身份”。
 
+如果想要一个最小但很强的反向证据样本，`hello` 案例特别有用：它在没有真实多轮工具执行的前提下，依然完整呈现 `panel/editAgent`、`ChatLocation.Agent = 7`、`modeInstructions2` 注入和 Agent prompt 组装。这意味着模式已经在模型调用前被代码定下来；否则一个纯 greeting 不会先天带着整套 Agent 外壳进入请求。与之相对，`create-file` 案例则说明，一旦第一轮模型真的选择工具，同一条骨架就会继续扩展成真实多轮闭环。两者共同证明：intent 和 mode 的选择是前置编排责任，LLM 只是在既定车道里决定动作，不负责决定“这次是不是 Agent”。
+
 ### 4.2.3 当前代码库里的全量 Intent 总表
 
 这一节回答一个比“谁决定 intent”更落地的问题：**一旦 intent 选定，系统接下来到底会走哪条执行链。**
@@ -215,8 +238,8 @@ flowchart TD
 
 | 枚举/路由标签 | 当前状态 | 代码参考 | 注释 |
 | --- | --- | --- | --- |
-| `SemanticSearch` | 在 `Intent` 枚举里存在，但不在当前 `IntentRegistry` 注册表中作为独立 intent 类出现 | [../src/extension/common/constants.ts](../src/extension/common/constants.ts)<br/>[../src/extension/intents/node/allIntents.ts](../src/extension/intents/node/allIntents.ts) | 更像历史/路由层标签，而不是当前这套 node intents 里的独立实现 |
-| `Editor` | 在 `Intent` 枚举和 `agentsToCommands` 映射里存在，但不在当前 `IntentRegistry` 里单独注册 | [../src/extension/common/constants.ts](../src/extension/common/constants.ts)<br/>[../src/extension/intents/node/allIntents.ts](../src/extension/intents/node/allIntents.ts) | 它更多是 participant/command 路由侧的名字，不应直接理解成一行和 `Edit` 平级的 node intent 实现 |
+| `SemanticSearch` | 在 `Intent` 枚举里存在，但不在当前 `IntentRegistry` 注册表中作为独立 intent 类出现 | [../src/extension/common/constants.ts](../src/extension/common/constants.ts)；[../src/extension/intents/node/allIntents.ts](../src/extension/intents/node/allIntents.ts) | 更像历史/路由层标签，而不是当前这套 node intents 里的独立实现 |
+| `Editor` | 在 `Intent` 枚举和 `agentsToCommands` 映射里存在，但不在当前 `IntentRegistry` 里单独注册 | [../src/extension/common/constants.ts](../src/extension/common/constants.ts)；[../src/extension/intents/node/allIntents.ts](../src/extension/intents/node/allIntents.ts) | 它更多是 participant/command 路由侧的名字，不应直接理解成一行和 `Edit` 平级的 node intent 实现 |
 
 如果把这张表再压缩成一句架构判断，可以得到一个很实用的经验法则：
 
@@ -1162,7 +1185,7 @@ flowchart TD
 
 因为它的分支明显更多，所以这里我不把它塞回上面那张 `Doc` 顶层图，而是单独给它一张放大的顶层流程图。
 
-#### 案例设定
+#### Agent 案例设定
 
 这里用一个相对复杂、能够把 `Agent` 主链上大部分关键分支都覆盖到的例子：
 
@@ -1660,6 +1683,21 @@ sequenceDiagram
 
 基类定义在 [`src/extension/intents/node/toolCallingLoop.ts`](../src/extension/intents/node/toolCallingLoop.ts)。
 
+#### 4.3.1 并不是每个 Agent 请求都会长成“多轮工具风暴”
+
+`Tool Calling Loop` 是 Agent Mode 的执行内核，但“有 loop”不等于“每次都会展开很多轮可见工具调用”。把这点说清楚，最好的办法仍然是并排看最小样本和满载样本：
+
+| 维度 | `hello` | `create-file` | 架构上应如何理解 |
+| --- | --- | --- | --- |
+| 入口 | `editsAgent` + `Intent.Agent` | `editsAgent` + `Intent.Agent` | 两者进入的是同一条顶层 Agent 骨架 |
+| 首轮模型判断 | 直接判断 greeting 不需要 tools | 先探测目录，再逐轮落地文件改动 | LLM 决定的是 loop 内动作，不是“这次属不属于 Agent” |
+| 可见工具回合 | 没有真正展开 | 展开为 4 次工具执行 + 1 次最终回答 | 同一条 loop 可以在首轮收口，也可以扩展成多轮闭环 |
+| prompt 组装期副作用 | 出现 `manage_todo_list(read)` 探测，但没有进入真实 tool round | 主视角被真实工具回合占据 | 不要把 prompt 装配期的上下文读取误认成模型规划出的第一步 |
+| approval | 没有 | `create_file`、`read_file`、`apply_patch` 共 3 次 | 安全门绑定资源访问和工具准备阶段，不绑定最终自然语言回答 |
+| continuation / cache | 单轮 cache read，不存在 `previous_response_id` | 第 2 轮后可见 stateful continuation 与高比例 cache read | `cached tokens` 只能说明 provider 复用了部分前缀，不能自动推出多轮续接 |
+
+因此，更准确的说法不是“Agent 就是多轮工具调用”，而是：**Agent 提供一套能承载多轮工具闭环的执行骨架；是否真的展开、展开到多深，要看首轮及后续轮次的模型判断与工具反馈。**
+
 ### 4.4 Subagent
 
 **Subagent** 是主代理为了提升复杂任务完成率而引入的专用执行单元。
@@ -1671,6 +1709,8 @@ sequenceDiagram
 - 主代理像 Tech Lead
 - Search Subagent 像检索/情报小组
 - Execution Subagent 像执行/验证小组
+
+但 `database qna` 样本说明还要再补一个反直觉限定：**复杂任务并不自动等于“必须起子代理”**。在那条真实链路里，主代理很长一段时间都停留在自己的研究 loop 中，通过 `Codebase` 预取、`grep_search`、`read_file` 和多轮重规划逐步收敛；`SearchSubagent` 是可选的专项委派分支，不是每个大代码库问题都会无条件进入的默认阶段。换句话说，静态架构上最好把 subagent 理解成 conditional branch，而不是主链中间必经的一层。
 
 ### 4.5 Participant、主 Agent 与 Subagent 在一个 Session 里的关系
 

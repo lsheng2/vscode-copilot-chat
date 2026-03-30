@@ -1,0 +1,2427 @@
+> 🚨 Note: This log may contain personal information such as the contents of your files or terminal output. Please review the contents carefully before sharing.
+# panel/editAgent - 043de61c
+
+- [Request Messages](#request-messages)
+  - [System](#system)
+  - [User](#user)
+- [Response](#response)
+
+## Metadata
+<pre><code>
+requestType      : ChatResponses
+model            : gpt-5.4
+maxPromptTokens  : 271997
+maxResponseTokens: 128000
+location         : 7
+otherOptions     : {"stream":true,"store":false}
+reasoning        : {"effort":"high","summary":"detailed"}
+intent           : undefined
+startTime        : 2026-03-28T12:23:39.917Z
+endTime          : 2026-03-28T12:23:44.120Z
+duration         : 4203ms
+ourRequestId     : 2ea066c6-c727-4894-82bb-6d52bdad1f81
+requestId        : 2ea066c6-c727-4894-82bb-6d52bdad1f81
+serverRequestId  : 2ea066c6-c727-4894-82bb-6d52bdad1f81
+timeToFirstToken : 2606ms
+resolved model   : gpt-5.4-2026-03-05
+usage            : {"prompt_tokens":20803,"completion_tokens":102,"total_tokens":20905,"prompt_tokens_details":{"cached_tokens":4608},"completion_tokens_details":{"reasoning_tokens":87,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0}}
+<details>
+<summary>tools (80)     : apply_patch, create_directory, create_file, create_new_jupyter_notebook, create_new_workspace, edit_notebook_file, fetch_webpage, file_search, grep_search, get_changed_files, get_errors, copilot_getNotebookSummary, get_project_setup_info, get_search_view_results, get_vscode_api, install_extension, list_dir, memory, read_file, read_notebook_cell_output, resolve_memory_file_uri, run_notebook_cell, run_vscode_command, semantic_search, test_failure, view_image, vscode_askQuestions, vscode_listCodeUsages, vscode_searchExtensions_internal, await_terminal, create_and_run_task, get_terminal_output, kill_terminal, manage_todo_list, open_browser_page, run_in_terminal, runSubagent, terminal_last_command, terminal_selection, activate_notebook_kernel_configuration, activate_notebook_package_management, configure_notebook, restart_notebook_kernel, configure_python_environment, get_python_environment_details, get_python_executable_details, install_python_packages, evaluateExpressionInDebugSession, listDebugSessions, activate_pull_request_review_tools, activate_pull_request_management_tools, activate_file_management_tools, activate_repository_information_tools, activate_release_management_tools, activate_search_and_discovery_tools, activate_branch_and_commit_tools, mcp_github_assign_copilot_to_issue, mcp_github_create_or_update_file, mcp_github_fork_repository, mcp_github_get_copilot_job_status, mcp_github_get_teams, mcp_github_push_files, mcp_github_run_secret_scanning, mcp_github_search_pull_requests, activate_git_branch_management_tools, activate_pull_request_management_tools_2, activate_pull_request_commenting_tools, activate_personal_issue_and_pull_request_management_tools, mcp_gitkraken_git_add_or_commit, mcp_gitkraken_git_blame, mcp_gitkraken_git_push, mcp_gitkraken_git_stash, renderMermaidDiagram, mcp_github_search_users, mcp_github_search_repositories, mcp_github_get_me, mcp_gitkraken_pull_request_assigned_to_me, mcp_gitkraken_issues_assigned_to_me, mcp_gitkraken_pull_request_create, mcp_gitkraken_gitkraken_workspace_list</summary>[
+    {
+        "name": "apply_patch",
+        "description": "Edit text files. Do not use this tool to edit Jupyter notebooks. `apply_patch` allows you to execute a diff/patch against a text file, but the format of the diff specification is unique to this task, so pay careful attention to these instructions. To use the `apply_patch` command, you should pass a message of the following structure as \"input\":\n\n*** Begin Patch\n[YOUR_PATCH]\n*** End Patch\n\nWhere [YOUR_PATCH] is the actual content of your patch, specified in the following V4A diff format.\n\n*** [ACTION] File: [/absolute/path/to/file] -> ACTION can be one of Add, Update, or Delete.\nAn example of a message that you might pass as \"input\" to this function, in order to apply a patch, is shown below.\n\n*** Begin Patch\n*** Update File: /Users/someone/pygorithm/searching/binary_search.py\n@@class BaseClass\n@@    def search():\n-        pass\n+        raise NotImplementedError()\n\n@@class Subclass\n@@    def search():\n-        pass\n+        raise NotImplementedError()\n\n*** End Patch\nDo not use line numbers in this diff format.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "description": "The edit patch to apply."
+                },
+                "explanation": {
+                    "type": "string",
+                    "description": "A short description of what the tool call is aiming to achieve."
+                }
+            },
+            "required": [
+                "input",
+                "explanation"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "create_directory",
+        "description": "Create a new directory structure in the workspace. Will recursively create all directories in the path, like mkdir -p. You do not need to use this tool before using create_file, that tool will automatically create the needed directories.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "dirPath": {
+                    "type": "string",
+                    "description": "The absolute path to the directory to create."
+                }
+            },
+            "required": [
+                "dirPath"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "create_file",
+        "description": "This is a tool for creating a new file in the workspace. The file will be created with the specified content. The directory will be created if it does not already exist. Never use this tool to edit a file that already exists.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "filePath": {
+                    "type": "string",
+                    "description": "The absolute path to the file to create."
+                },
+                "content": {
+                    "type": "string",
+                    "description": "The content to write to the file."
+                }
+            },
+            "required": [
+                "filePath",
+                "content"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "create_new_jupyter_notebook",
+        "description": "Generates a new Jupyter Notebook (.ipynb) in VS Code. Jupyter Notebooks are interactive documents commonly used for data exploration, analysis, visualization, and combining code with narrative text. Prefer creating plain Python files or similar unless a user explicitly requests creating a new Jupyter Notebook or already has a Jupyter Notebook opened or exists in the workspace.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The query to use to generate the jupyter notebook. This should be a clear and concise description of the notebook the user wants to create."
+                }
+            },
+            "required": [
+                "query"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "create_new_workspace",
+        "description": "Get comprehensive setup steps to help the user create complete project structures in a VS Code workspace. This tool is designed for full project initialization and scaffolding, not for creating individual files.\n\nWhen to use this tool:\n- User wants to create a new complete project from scratch\n- Setting up entire project frameworks (TypeScript projects, React apps, Node.js servers, etc.)\n- Initializing Model Context Protocol (MCP) servers with full structure\n- Creating VS Code extensions with proper scaffolding\n- Setting up Next.js, Vite, or other framework-based projects\n- User asks for \"new project\", \"create a workspace\", \"set up a [framework] project\"\n- Need to establish complete development environment with dependencies, config files, and folder structure\n\nWhen NOT to use this tool:\n- Creating single files or small code snippets\n- Adding individual files to existing projects\n- Making modifications to existing codebases\n- User asks to \"create a file\" or \"add a component\"\n- Simple code examples or demonstrations\n- Debugging or fixing existing code\n\nThis tool provides complete project setup including:\n- Folder structure creation\n- Package.json and dependency management\n- Configuration files (tsconfig, eslint, etc.)\n- Initial boilerplate code\n- Development environment setup\n- Build and run instructions\n\nUse other file creation tools for individual files within existing projects.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The query to use to generate the new workspace. This should be a clear and concise description of the workspace the user wants to create."
+                }
+            },
+            "required": [
+                "query"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "edit_notebook_file",
+        "description": "This is a tool for editing an existing Notebook file in the workspace. Generate the \"explanation\" property first.\nThe system is very smart and can understand how to apply your edits to the notebooks.\nWhen updating the content of an existing cell, ensure newCode preserves whitespace and indentation exactly and does NOT include any code markers such as (...existing code...).",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "filePath": {
+                    "type": "string",
+                    "description": "An absolute path to the notebook file to edit, or the URI of a untitled, not yet named, file, such as `untitled:Untitled-1."
+                },
+                "cellId": {
+                    "type": "string",
+                    "description": "Id of the cell that needs to be deleted or edited. Use the value `TOP`, `BOTTOM` when inserting a cell at the top or bottom of the notebook, else provide the id of the cell after which a new cell is to be inserted. Remember, if a cellId is provided and editType=insert, then a cell will be inserted after the cell with the provided cellId."
+                },
+                "newCode": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "description": "The code for the new or existing cell to be edited. Code should not be wrapped within <VSCode.Cell> tags. Do NOT include code markers such as (...existing code...) to indicate existing code."
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "description": "The code for the new or existing cell to be edited. Code should not be wrapped within <VSCode.Cell> tags"
+                            }
+                        }
+                    ]
+                },
+                "language": {
+                    "type": "string",
+                    "description": "The language of the cell. `markdown`, `python`, `javascript`, `julia`, etc."
+                },
+                "editType": {
+                    "type": "string",
+                    "enum": [
+                        "insert",
+                        "delete",
+                        "edit"
+                    ],
+                    "description": "The operation peformed on the cell, whether `insert`, `delete` or `edit`.\nUse the `editType` field to specify the operation: `insert` to add a new cell, `edit` to modify an existing cell's content, and `delete` to remove a cell."
+                }
+            },
+            "required": [
+                "filePath",
+                "editType",
+                "cellId"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "fetch_webpage",
+        "description": "Fetches the main content from a web page. This tool is useful for summarizing or analyzing the content of a webpage. You should use this tool when you think the user is looking for information from a specific webpage.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "urls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "An array of URLs to fetch content from."
+                },
+                "query": {
+                    "type": "string",
+                    "description": "The query to search for in the web page's content. This should be a clear and concise description of the content you want to find."
+                }
+            },
+            "required": [
+                "urls",
+                "query"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "file_search",
+        "description": "Search for files in the workspace by glob pattern. This only returns the paths of matching files. Use this tool when you know the exact filename pattern of the files you're searching for. Glob patterns match from the root of the workspace folder. Examples:\n- **/*.{js,ts} to match all js/ts files in the workspace.\n- src/** to match all files under the top-level src folder.\n- **/foo/**/*.js to match all js files under any foo folder in the workspace.\n\nIn a multi-root workspace, you can scope the search to a specific workspace folder by using the absolute path to the folder as the query, e.g. /path/to/folder/**/*.ts.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Search for files with names or paths matching this glob pattern. Can also be an absolute path to a workspace folder to scope the search in a multi-root workspace."
+                },
+                "maxResults": {
+                    "type": "number",
+                    "description": "The maximum number of results to return. Do not use this unless necessary, it can slow things down. By default, only some matches are returned. If you use this and don't see what you're looking for, you can try again with a more specific query or a larger maxResults."
+                }
+            },
+            "required": [
+                "query"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "grep_search",
+        "description": "Do a fast text search in the workspace. Use this tool when you want to search with an exact string or regex. If you are not sure what words will appear in the workspace, prefer using regex patterns with alternation (|) or character classes to search for multiple potential words at once instead of making separate searches. For example, use 'function|method|procedure' to look for all of those words at once. Use includePattern to search within files matching a specific pattern, or in a specific file, using a relative path. Use 'includeIgnoredFiles' to include files normally ignored by .gitignore, other ignore files, and `files.exclude` and `search.exclude` settings. Warning: using this may cause the search to be slower, only set it when you want to search in ignored folders like node_modules or build outputs. Use this tool when you want to see an overview of a particular file, instead of using read_file many times to look for code within a file.\n\nIn a multi-root workspace, you can scope the search to a specific workspace folder by using the absolute path to the folder as the includePattern, e.g. /path/to/folder.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The pattern to search for in files in the workspace. Use regex with alternation (e.g., 'word1|word2|word3') or character classes to find multiple potential words in a single search. Be sure to set the isRegexp property properly to declare whether it's a regex or plain text pattern. Is case-insensitive."
+                },
+                "isRegexp": {
+                    "type": "boolean",
+                    "description": "Whether the pattern is a regex."
+                },
+                "includePattern": {
+                    "type": "string",
+                    "description": "Search files matching this glob pattern. Will be applied to the relative path of files within the workspace. To search recursively inside a folder, use a proper glob pattern like \"src/folder/**\". Do not use | in includePattern. Can also be an absolute path to a workspace folder to scope the search in a multi-root workspace."
+                },
+                "maxResults": {
+                    "type": "number",
+                    "description": "The maximum number of results to return. Do not use this unless necessary, it can slow things down. By default, only some matches are returned. If you use this and don't see what you're looking for, you can try again with a more specific query or a larger maxResults."
+                },
+                "includeIgnoredFiles": {
+                    "type": "boolean",
+                    "description": "Whether to include files that would normally be ignored according to .gitignore, other ignore files and `files.exclude` and `search.exclude` settings. Warning: using this may cause the search to be slower. Only set it when you want to search in ignored folders like node_modules or build outputs."
+                }
+            },
+            "required": [
+                "query",
+                "isRegexp"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "get_changed_files",
+        "description": "Get git diffs of current file changes in a git repository. Don't forget that you can use run_in_terminal to run git commands in a terminal as well.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "repositoryPath": {
+                    "type": "string",
+                    "description": "The absolute path to the git repository to look for changes in. If not provided, the active git repository will be used."
+                },
+                "sourceControlState": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "staged",
+                            "unstaged",
+                            "merge-conflicts"
+                        ]
+                    },
+                    "description": "The kinds of git state to filter by. Allowed values are: 'staged', 'unstaged', and 'merge-conflicts'. If not provided, all states will be included."
+                }
+            }
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "get_errors",
+        "description": "Get any compile or lint errors in a specific file or across all files. If the user mentions errors or problems in a file, they may be referring to these. Use the tool to see the same errors that the user is seeing. If the user asks you to analyze all errors, or does not specify a file, use this tool to gather errors for all files. Also use this tool after editing a file to validate the change.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "filePaths": {
+                    "description": "The absolute paths to the files or folders to check for errors. Omit 'filePaths' when retrieving all errors.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "copilot_getNotebookSummary",
+        "description": "This is a tool returns the list of the Notebook cells along with the id, cell types, line ranges, language, execution information and output mime types for each cell. This is useful to get Cell Ids when executing a notebook or determine what cells have been executed and what order, or what cells have outputs. If required to read contents of a cell use this to determine the line range of a cells, and then use read_file tool to read a specific line range. Requery this tool if the contents of the notebook change.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "filePath": {
+                    "type": "string",
+                    "description": "An absolute path to the notebook file with the cell to run, or the URI of a untitled, not yet named, file, such as `untitled:Untitled-1.ipynb"
+                }
+            },
+            "required": [
+                "filePath"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "get_project_setup_info",
+        "description": "Do not call this tool without first calling the tool to create a workspace. This tool provides a project setup information for a Visual Studio Code workspace based on a project type and programming language.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "projectType": {
+                    "type": "string",
+                    "description": "The type of project to create. Supported values are: 'python-script', 'python-project', 'mcp-server', 'model-context-protocol-server', 'vscode-extension', 'next-js', 'vite' and 'other'"
+                }
+            },
+            "required": [
+                "projectType"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "get_search_view_results",
+        "description": "The results from the search view",
+        "parameters": {},
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "get_vscode_api",
+        "description": "Get comprehensive VS Code API documentation and references for extension development. This tool provides authoritative documentation for VS Code's extensive API surface, including proposed APIs, contribution points, and best practices. Use this tool for understanding complex VS Code API interactions.\n\nWhen to use this tool:\n- User asks about specific VS Code APIs, interfaces, or extension capabilities\n- Need documentation for VS Code extension contribution points (commands, views, settings, etc.)\n- Questions about proposed APIs and their usage patterns\n- Understanding VS Code extension lifecycle, activation events, and packaging\n- Best practices for VS Code extension development architecture\n- API examples and code patterns for extension features\n- Troubleshooting extension-specific issues or API limitations\n\nWhen NOT to use this tool:\n- Creating simple standalone files or scripts unrelated to VS Code extensions\n- General programming questions not specific to VS Code extension development\n- Questions about using VS Code as an editor (user-facing features)\n- Non-extension related development tasks\n- File creation or editing that doesn't involve VS Code extension APIs\n\nCRITICAL usage guidelines:\n1. Always include specific API names, interfaces, or concepts in your query\n2. Mention the extension feature you're trying to implement\n3. Include context about proposed vs stable APIs when relevant\n4. Reference specific contribution points when asking about extension manifest\n5. Be specific about the VS Code version or API version when known\n\nScope: This tool is for EXTENSION DEVELOPMENT ONLY - building tools that extend VS Code itself, not for general file creation or non-extension programming tasks.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The query to search vscode documentation for. Should contain all relevant context."
+                }
+            },
+            "required": [
+                "query"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "install_extension",
+        "description": "Install an extension in VS Code. Use this tool to install an extension in Visual Studio Code as part of a new workspace creation process only.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "The ID of the extension to install. This should be in the format <publisher>.<extension>."
+                },
+                "name": {
+                    "type": "string",
+                    "description": "The name of the extension to install. This should be a clear and concise description of the extension."
+                }
+            },
+            "required": [
+                "id",
+                "name"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "list_dir",
+        "description": "List the contents of a directory. Result will have the name of the child. If the name ends in /, it's a folder, otherwise a file",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "description": "The absolute path to the directory to list."
+                }
+            },
+            "required": [
+                "path"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "memory",
+        "description": "Manage a persistent memory system with three scopes for storing notes and information across conversations.\n\nMemory is organized under /memories/ with three tiers:\n- `/memories/` — User memory: persistent notes that survive across all workspaces and conversations. Store preferences, patterns, and general insights here.\n- `/memories/session/` — Session memory: notes scoped to the current conversation. Store task-specific context and in-progress notes here. Cleared after the conversation ends.\n- `/memories/repo/` — Repository memory: repository-scoped facts stored via Copilot. Only the `create` command is supported for this path.\n\nIMPORTANT: Before creating new memory files, first view the /memories/ directory to understand what already exists. This helps avoid duplicates and maintain organized notes.\n\nCommands:\n- `view`: View contents of a file or list directory contents. Can be used on files or directories (e.g., \"/memories/\" to see all top-level items).\n- `create`: Create a new file at the specified path with the given content. Fails if the file already exists.\n- `str_replace`: Replace an exact string in a file with a new string. The old_str must appear exactly once in the file.\n- `insert`: Insert text at a specific line number in a file. Line 0 inserts at the beginning.\n- `delete`: Delete a file or directory (and all its contents).\n- `rename`: Rename or move a file or directory from path to new_path. Cannot rename across scopes.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "command": {
+                    "type": "string",
+                    "enum": [
+                        "view",
+                        "create",
+                        "str_replace",
+                        "insert",
+                        "delete",
+                        "rename"
+                    ],
+                    "description": "The operation to perform on the memory file system."
+                },
+                "path": {
+                    "type": "string",
+                    "description": "The absolute path to the file or directory inside /memories/, e.g. \"/memories/notes.md\". Used by all commands except `rename`."
+                },
+                "file_text": {
+                    "type": "string",
+                    "description": "Required for `create`. The content of the file to create."
+                },
+                "old_str": {
+                    "type": "string",
+                    "description": "Required for `str_replace`. The exact string in the file to replace. Must appear exactly once."
+                },
+                "new_str": {
+                    "type": "string",
+                    "description": "Required for `str_replace`. The new string to replace old_str with."
+                },
+                "insert_line": {
+                    "type": "number",
+                    "description": "Required for `insert`. The 0-based line number to insert text at. 0 inserts before the first line."
+                },
+                "insert_text": {
+                    "type": "string",
+                    "description": "Required for `insert`. The text to insert at the specified line."
+                },
+                "view_range": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "description": "Optional for `view`. A two-element array [start_line, end_line] (1-indexed) to view a specific range of lines."
+                },
+                "old_path": {
+                    "type": "string",
+                    "description": "Required for `rename`. The current path of the file or directory to rename."
+                },
+                "new_path": {
+                    "type": "string",
+                    "description": "Required for `rename`. The new path for the file or directory."
+                }
+            },
+            "required": [
+                "command"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "read_file",
+        "description": "Read the contents of a file.\n\nYou must specify the line range you're interested in. Line numbers are 1-indexed. If the file contents returned are insufficient for your task, you may call this tool again to retrieve more content. Prefer reading larger ranges over doing many small reads. Binary files use startLine/endLine as byte offsets.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "filePath": {
+                    "description": "The absolute path of the file to read.",
+                    "type": "string"
+                },
+                "startLine": {
+                    "type": "number",
+                    "description": "The line number to start reading from, 1-based."
+                },
+                "endLine": {
+                    "type": "number",
+                    "description": "The inclusive line number to end reading at, 1-based."
+                }
+            },
+            "required": [
+                "filePath",
+                "startLine",
+                "endLine"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "read_notebook_cell_output",
+        "description": "This tool will retrieve the output for a notebook cell from its most recent execution or restored from disk. The cell may have output even when it has not been run in the current kernel session. This tool has a higher token limit for output length than the runNotebookCell tool.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "filePath": {
+                    "type": "string",
+                    "description": "An absolute path to the notebook file with the cell to run, or the URI of a untitled, not yet named, file, such as `untitled:Untitled-1.ipynb"
+                },
+                "cellId": {
+                    "type": "string",
+                    "description": "The ID of the cell for which output should be retrieved."
+                }
+            },
+            "required": [
+                "filePath",
+                "cellId"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "resolve_memory_file_uri",
+        "description": "Resolve a memory file path (like /memories/session/plan.md or /memories/repo/notes.md) to its fully qualified URI. Use this when you need the actual URI for a memory file, for example to pass it to setArtifacts. The path must start with /memories/.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "description": "The memory file path to resolve (e.g. /memories/session/plan.md)."
+                }
+            },
+            "required": [
+                "path"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "run_notebook_cell",
+        "description": "This is a tool for running a code cell in a notebook file directly in the notebook editor. The output from the execution will be returned. Code cells should be run as they are added or edited when working through a problem to bring the kernel state up to date and ensure the code executes successfully. Code cells are ready to run and don't require any pre-processing. If asked to run the first cell in a notebook, you should run the first code cell since markdown cells cannot be executed. NOTE: Avoid executing Markdown cells or providing Markdown cell IDs, as Markdown cells cannot be  executed.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "filePath": {
+                    "type": "string",
+                    "description": "An absolute path to the notebook file with the cell to run, or the URI of a untitled, not yet named, file, such as `untitled:Untitled-1.ipynb"
+                },
+                "reason": {
+                    "type": "string",
+                    "description": "An optional explanation of why the cell is being run. This will be shown to the user before the tool is run and is not necessary if it's self-explanatory."
+                },
+                "cellId": {
+                    "type": "string",
+                    "description": "The ID for the code cell to execute. Avoid providing markdown cell IDs as nothing will be executed."
+                },
+                "continueOnError": {
+                    "type": "boolean",
+                    "description": "Whether or not execution should continue for remaining cells if an error is encountered. Default to false unless instructed otherwise."
+                }
+            },
+            "required": [
+                "filePath",
+                "cellId"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "run_vscode_command",
+        "description": "Run a command in VS Code. Use this tool to run a command in Visual Studio Code as part of a new workspace creation process only.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "commandId": {
+                    "type": "string",
+                    "description": "The ID of the command to execute. This should be in the format <command>."
+                },
+                "name": {
+                    "type": "string",
+                    "description": "The name of the command to execute. This should be a clear and concise description of the command."
+                },
+                "args": {
+                    "type": "array",
+                    "description": "The arguments to pass to the command. This should be an array of strings.",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "skipCheck": {
+                    "type": "boolean",
+                    "description": "If true, skip checking whether the command exists before executing it."
+                }
+            },
+            "required": [
+                "commandId",
+                "name"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "semantic_search",
+        "description": "Run a natural language search for relevant code or documentation comments from the user's current workspace. Returns relevant code snippets from the user's current workspace if it is large, or the full contents of the workspace if it is small.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The query to search the codebase for. Should contain all relevant context. Should ideally be text that might appear in the codebase, such as function names, variable names, or comments."
+                }
+            },
+            "required": [
+                "query"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "test_failure",
+        "description": "Includes test failure information in the prompt.",
+        "parameters": {},
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "view_image",
+        "description": "View the contents of an image file. Use this instead of read_file for supported image files such as png, jpg, jpeg, gif, and webp. The tool returns the image directly to multimodal models and does not take line ranges or offsets.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "filePath": {
+                    "description": "The absolute path of the image file to view.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "filePath"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "vscode_askQuestions",
+        "description": "Use this tool to ask the user a small number of clarifying questions before proceeding. Provide the questions array with concise headers and prompts. Use options for fixed choices, set multiSelect when multiple selections are allowed. Users can always provide a freeform text answer alongside options unless you set allowFreeformInput to false.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "questions": {
+                    "type": "array",
+                    "description": "List of questions to ask the user. Order is preserved.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "header": {
+                                "type": "string",
+                                "description": "Short identifier for the question. Must be unique so answers can be mapped back to the question.",
+                                "maxLength": 50
+                            },
+                            "question": {
+                                "type": "string",
+                                "description": "The question text to display to the user. Keep it concise, ideally one sentence.",
+                                "maxLength": 200
+                            },
+                            "multiSelect": {
+                                "type": "boolean",
+                                "description": "Allow selecting multiple options when options are provided."
+                            },
+                            "allowFreeformInput": {
+                                "type": "boolean",
+                                "description": "Allow freeform text answers in addition to option selection. Defaults to true; set to false to restrict to predefined options only."
+                            },
+                            "options": {
+                                "type": "array",
+                                "description": "Optional list of selectable answers. If omitted, the question is free text.",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "label": {
+                                            "type": "string",
+                                            "description": "Display label and value for the option."
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "description": "Optional secondary text shown with the option."
+                                        },
+                                        "recommended": {
+                                            "type": "boolean",
+                                            "description": "Mark this option as the recommended default."
+                                        }
+                                    },
+                                    "required": [
+                                        "label"
+                                    ]
+                                }
+                            }
+                        },
+                        "required": [
+                            "header",
+                            "question"
+                        ]
+                    },
+                    "minItems": 1
+                }
+            },
+            "required": [
+                "questions"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "vscode_listCodeUsages",
+        "description": "Find all usages (references, definitions, and implementations) of a code symbol across the workspace. This tool locates where a symbol is referenced, defined, or implemented.\n\nInput:\n- \"symbol\": The exact name of the symbol to search for (function, class, method, variable, type, etc.).\n- \"uri\": A full URI (e.g. \"file:///path/to/file.ts\") of a file where the symbol appears. Provide either \"uri\" or \"filePath\".\n- \"filePath\": A workspace-relative file path (e.g. \"src/utils/helpers.ts\") of a file where the symbol appears. Provide either \"uri\" or \"filePath\".\n- \"lineContent\": A substring of the line of code where the symbol appears. This is used to locate the exact position in the file. Must be the actual text from the file - do NOT fabricate it.\n\nIMPORTANT: The file and line do NOT need to be the definition of the symbol. Any occurrence works - a usage, an import, a call site, etc. You can pick whichever occurrence is most convenient.\n\nIf the tool returns an error, retry with corrected input - ensure the file path is correct, the line content matches the actual file content, and the symbol name appears in that line.\n\nCurrently supported for: python.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "symbol": {
+                    "type": "string",
+                    "description": "The exact name of the symbol (function, class, method, variable, type, etc.) to find usages of."
+                },
+                "uri": {
+                    "type": "string",
+                    "description": "A full URI of a file where the symbol appears (e.g. \"file:///path/to/file.ts\"). Provide either \"uri\" or \"filePath\"."
+                },
+                "filePath": {
+                    "type": "string",
+                    "description": "A workspace-relative file path where the symbol appears (e.g. \"src/utils/helpers.ts\"). Provide either \"uri\" or \"filePath\"."
+                },
+                "lineContent": {
+                    "type": "string",
+                    "description": "A substring of the line of code where the symbol appears. Used to locate the exact position. Must be actual text from the file."
+                }
+            },
+            "required": [
+                "symbol",
+                "lineContent"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "vscode_searchExtensions_internal",
+        "description": "This is a tool for browsing Visual Studio Code Extensions Marketplace. It allows the model to search for extensions and retrieve detailed information about them. The model should use this tool whenever it needs to discover extensions or resolve information about known ones. To use the tool, the model has to provide the category of the extensions, relevant search keywords, or known extension IDs. Note that search results may include false positives, so reviewing and filtering is recommended.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "description": "The category of extensions to search for",
+                    "enum": [
+                        "AI",
+                        "Azure",
+                        "Chat",
+                        "Data Science",
+                        "Debuggers",
+                        "Extension Packs",
+                        "Education",
+                        "Formatters",
+                        "Keymaps",
+                        "Language Packs",
+                        "Linters",
+                        "Machine Learning",
+                        "Notebooks",
+                        "Programming Languages",
+                        "SCM Providers",
+                        "Snippets",
+                        "Testing",
+                        "Themes",
+                        "Visualization",
+                        "Other"
+                    ]
+                },
+                "keywords": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "The keywords to search for"
+                },
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "The ids of the extensions to search for"
+                }
+            }
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "await_terminal",
+        "description": "Wait for a background terminal command to complete. Returns the output, exit code, or timeout status.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "The ID of the terminal to await (returned by run_in_terminal when isBackground=true)."
+                },
+                "timeout": {
+                    "type": "number",
+                    "description": "Timeout in milliseconds. If the command does not complete within this time, returns the output collected so far with a timeout indicator. Use 0 for no timeout."
+                }
+            },
+            "required": [
+                "id",
+                "timeout"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "create_and_run_task",
+        "description": "Creates and runs a build, run, or custom task for the workspace by generating or adding to a tasks.json file based on the project structure (such as package.json or README.md). If the user asks to build, run, launch and they have no tasks.json file, use this tool. If they ask to create or add a task, use this tool.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "workspaceFolder": {
+                    "type": "string",
+                    "description": "The absolute path of the workspace folder where the tasks.json file will be created."
+                },
+                "task": {
+                    "type": "object",
+                    "description": "The task to add to the new tasks.json file.",
+                    "properties": {
+                        "label": {
+                            "type": "string",
+                            "description": "The label of the task."
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "The type of the task. The only supported value is 'shell'.",
+                            "enum": [
+                                "shell"
+                            ]
+                        },
+                        "command": {
+                            "type": "string",
+                            "description": "The shell command to run for the task. Use this to specify commands for building or running the application."
+                        },
+                        "args": {
+                            "type": "array",
+                            "description": "The arguments to pass to the command.",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "isBackground": {
+                            "type": "boolean",
+                            "description": "Whether the task runs in the background without blocking the UI or other tasks. Set to true for long-running processes like watch tasks or servers that should continue executing without requiring user attention. When false, the task will block the terminal until completion."
+                        },
+                        "problemMatcher": {
+                            "type": "array",
+                            "description": "The problem matcher to use to parse task output for errors and warnings. Can be a predefined matcher like '$tsc' (TypeScript), '$eslint - stylish', '$gcc', etc., or a custom pattern defined in tasks.json. This helps VS Code display errors in the Problems panel and enables quick navigation to error locations.",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "group": {
+                            "type": "string",
+                            "description": "The group to which the task belongs."
+                        }
+                    },
+                    "required": [
+                        "label",
+                        "type",
+                        "command"
+                    ]
+                }
+            },
+            "required": [
+                "task",
+                "workspaceFolder"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "get_terminal_output",
+        "description": "Get the output of a terminal command previously started with run_in_terminal",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "The ID of the terminal to check."
+                }
+            },
+            "required": [
+                "id"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "kill_terminal",
+        "description": "Kill a terminal by its ID. Use this to clean up terminals that are no longer needed (e.g., after stopping a server or when a long-running task completes). The terminal ID is returned by run_in_terminal when isBackground=true.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "The ID of the background terminal to kill (returned by run_in_terminal when isBackground=true)."
+                }
+            },
+            "required": [
+                "id"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "manage_todo_list",
+        "description": "Updates the task plan.\nProvide an optional explanation and a list of plan items, each with a step and status.\nAt most one step can be in_progress at a time.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "todoList": {
+                    "type": "array",
+                    "description": "Complete array of all todo items. Must include ALL items - both existing and new.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "number",
+                                "description": "Unique identifier for the todo. Use sequential numbers starting from 1."
+                            },
+                            "title": {
+                                "type": "string",
+                                "description": "Concise action-oriented todo label (3-7 words). Displayed in UI."
+                            },
+                            "status": {
+                                "type": "string",
+                                "enum": [
+                                    "not-started",
+                                    "in-progress",
+                                    "completed"
+                                ],
+                                "description": "not-started: Not begun | in-progress: Currently working (max 1) | completed: Fully finished with no blockers"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "title",
+                            "status"
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "todoList"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "open_browser_page",
+        "description": "Open a new browser page in the integrated browser at the given URL.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "description": "The full URL to open in the browser."
+                }
+            },
+            "required": [
+                "url"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "run_in_terminal",
+        "description": "This tool allows you to execute PowerShell commands in a persistent terminal session, preserving environment variables, working directory, and other context across multiple commands.\n\nCommand Execution:\n- Prefer ; when chaining commands on one line\n- Prefer pipelines | for object-based data flow\n- Never create a sub-shell (eg. powershell -c \"command\") unless explicitly asked\n\nDirectory Management:\n- Prefer relative paths when navigating directories, only use absolute when the path is far away or the current cwd is not expected\n- Remember when isBackground=false is specified, that the shell and cwd are reused until it is moved to the background\n- Use $PWD or Get-Location for current directory\n- Use Push-Location/Pop-Location for directory stack\n\nProgram Execution:\n- Supports .NET, Python, Node.js, and other executables\n- Install modules via Install-Module, Install-Package\n- Use Get-Command to verify cmdlet/function availability\n\nBackground Processes:\n- For long-running tasks (e.g., servers), set isBackground=true\n- Returns a terminal ID for checking status and runtime later\n- Use Start-Job for background PowerShell jobs\n\nOutput Management:\n- Output is automatically truncated if longer than 60KB to prevent context overflow\n- Use Select-Object, Where-Object, Format-Table to filter output\n- Use -First/-Last parameters to limit results\n- For pager commands, add | Out-String or | Format-List\n\nBest Practices:\n- Use proper cmdlet names instead of aliases in scripts\n- Quote paths with spaces: \"C:\\Path With Spaces\"\n- Prefer PowerShell cmdlets over external commands when available\n- Prefer idiomatic PowerShell like Get-ChildItem instead of dir or ls for file listings\n- Use Test-Path to check file/directory existence\n- Be specific with Select-Object properties to avoid excessive output\n- Avoid printing credentials unless absolutely required",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "command": {
+                    "type": "string",
+                    "description": "The command to run in the terminal."
+                },
+                "explanation": {
+                    "type": "string",
+                    "description": "A one-sentence description of what the command does. This will be shown to the user before the command is run."
+                },
+                "goal": {
+                    "type": "string",
+                    "description": "A short description of the goal or purpose of the command (e.g., \"Install dependencies\", \"Start development server\")."
+                },
+                "isBackground": {
+                    "type": "boolean",
+                    "description": "Whether the command starts a background process.\n\n- If true, a new shell will be spawned where the cwd is the workspace directory and will run asynchronously in the background and you will not see the output.\n\n- If false, a single shell is shared between all non-background terminals where the cwd starts at the workspace directory and is remembered until that terminal is moved to the background, the tool call will block on the command finishing and only then you will get the output.\n\nExamples of background processes: building in watch mode, starting a server. You can check the output of a background process later on by using get_terminal_output."
+                },
+                "timeout": {
+                    "type": "number",
+                    "description": "An optional timeout in milliseconds. When provided, the tool will stop tracking the command after this duration and return the output collected so far with a timeout indicator. Be conservative with the timeout duration, give enough time that the command would complete on a low-end machine. Use 0 for no timeout. If it's not clear how long the command will take then use 0 to avoid prematurely terminating it, never guess too low."
+                }
+            },
+            "required": [
+                "command",
+                "explanation",
+                "goal",
+                "isBackground",
+                "timeout"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "runSubagent",
+        "description": "Launch a new agent to handle complex, multi-step tasks autonomously. This tool is good at researching complex questions, searching for code, and executing multi-step tasks. When you are searching for a keyword or file and are not confident that you will find the right match in the first few tries, use this agent to perform the search for you.\n\n- Agents do not run async or in the background, you will wait for the agent's result.\n- When the agent is done, it will return a single message back to you. The result returned by the agent is not visible to the user. To show the user the result, you should send a text message back to the user with a concise summary of the result.\n- Each agent invocation is stateless. You will not be able to send additional messages to the agent, nor will the agent be able to communicate with you outside of its final report. Therefore, your prompt should contain a highly detailed task description for the agent to perform autonomously and you should specify exactly what information the agent should return back to you in its final and only message to you.\n- The agent's outputs should generally be trusted\n- Clearly tell the agent whether you expect it to write code or just to do research (search, file reads, web fetches, etc.), since it is not aware of the user's intent\n- If the user asks for a certain agent, you MUST provide that EXACT agent name (case-sensitive) to invoke that specific agent.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "prompt": {
+                    "type": "string",
+                    "description": "A detailed description of the task for the agent to perform"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "A short (3-5 word) description of the task"
+                },
+                "agentName": {
+                    "type": "string",
+                    "description": "Optional name of a specific agent to invoke. If not provided, uses the current agent."
+                }
+            },
+            "required": [
+                "prompt",
+                "description"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "terminal_last_command",
+        "description": "Get the last command run in the active terminal.",
+        "parameters": {},
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "terminal_selection",
+        "description": "Get the current selection in the active terminal.",
+        "parameters": {},
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "activate_notebook_kernel_configuration",
+        "description": "Call this tool when you need access to a new category of tools. The category of tools is described as follows:\n\nThis group of tools is focused on configuring the execution environment for Jupyter notebooks by selecting and starting the appropriate kernel. The 'configure_non_python_notebook' tool allows users to select and initiate a kernel for notebooks that do not use Python, accommodating various programming languages and environments. Conversely, the 'configure_python_notebook' tool is specifically designed for Python notebooks, ensuring that the correct Python kernel is selected and started for executing Python code. Together, these tools enable users to set up their notebooks for the desired programming language, facilitating a seamless coding experience across different environments.\n\nBe sure to call this tool if you need a capability related to the above.",
+        "parameters": {},
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "activate_notebook_package_management",
+        "description": "Call this tool when you need access to a new category of tools. The category of tools is described as follows:\n\nThis group of tools is dedicated to managing packages within Jupyter notebooks that utilize Python code cells. The 'notebook_install_packages' tool allows users to install a specified list of packages directly into the currently selected notebook kernel, ensuring that all necessary libraries are available for the code being executed. It is important to use this tool only after configuring the notebook with the appropriate kernel using the configuration tools. The 'notebook_list_packages' tool complements this functionality by providing a way to list all currently installed packages in the selected kernel, allowing users to verify the availability of required libraries before running their code. Together, these tools streamline the process of package management in Jupyter notebooks, enhancing the development workflow for Python programming.\n\nBe sure to call this tool if you need a capability related to the above.",
+        "parameters": {},
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "configure_notebook",
+        "description": "Tool used to configure a Notebook. ALWAYS use this tool before running/executing any Notebook Cells for the first time or before listing/installing packages in Notebooks for the first time. I.e. there is no need to use this tool more than once for the same notebook.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "filePath": {
+                    "description": "The absolute path of the notebook with the active kernel.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "filePath"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "restart_notebook_kernel",
+        "description": "Tool used to restart a Notebook kernel. Some packages require a restart of the kernel after being installed. Use this if after installing a package if you know the package requires a restart, or if still getting an error about a missing package after installing.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "filePath": {
+                    "description": "The absolute path of the notebook with the active kernel.",
+                    "type": "string"
+                },
+                "reason": {
+                    "description": "The reason for restarting the kernel.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "filePath"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "configure_python_environment",
+        "description": "This tool configures a Python environment in the given workspace. ALWAYS Use this tool to set up the user's chosen environment and ALWAYS call this tool before using any other Python related tools or running any Python command in the terminal. IMPORTANT: This tool is only for Python environments (venv, virtualenv, conda, pipenv, poetry, pyenv, pixi, or any other Python environment manager). Do not use this tool for npm packages, system packages, Ruby gems, or any other non-Python dependencies.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "resourcePath": {
+                    "type": "string",
+                    "description": "The path to the Python file or workspace for which a Python Environment needs to be configured."
+                }
+            },
+            "required": []
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "get_python_environment_details",
+        "description": "This tool will retrieve the details of the Python Environment for the specified file or workspace. The details returned include the 1. Type of Python Environment (conda, venv, etc), 2. Version of Python, 3. List of all installed Python packages with their versions. ALWAYS call configure_python_environment before using this tool. IMPORTANT: This tool is only for Python environments (venv, virtualenv, conda, pipenv, poetry, pyenv, pixi, or any other Python environment manager). Do not use this tool for npm packages, system packages, Ruby gems, or any other non-Python dependencies.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "resourcePath": {
+                    "type": "string",
+                    "description": "The path to the Python file or workspace to get the environment information for."
+                }
+            },
+            "required": []
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "get_python_executable_details",
+        "description": "This tool will retrieve the details of the Python Environment for the specified file or workspace. ALWAYS use this tool before executing any Python command in the terminal. This tool returns the details of how to construct the fully qualified path and or command including details such as arguments required to run Python in a terminal. Note: Instead of executing `python --version` or `python -c 'import sys; print(sys.executable)'`, use this tool to get the Python executable path to replace the `python` command. E.g. instead of using `python -c 'import sys; print(sys.executable)'`, use this tool to build the command `conda run -n <env_name> -c 'import sys; print(sys.executable)'`. ALWAYS call configure_python_environment before using this tool. IMPORTANT: This tool is only for Python environments (venv, virtualenv, conda, pipenv, poetry, pyenv, pixi, or any other Python environment manager). Do not use this tool for npm packages, system packages, Ruby gems, or any other non-Python dependencies.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "resourcePath": {
+                    "type": "string",
+                    "description": "The path to the Python file or workspace to get the executable information for. If not provided, the current workspace will be used. Where possible pass the path to the file or workspace."
+                }
+            },
+            "required": []
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "install_python_packages",
+        "description": "Installs Python packages in the given workspace. Use this tool to install Python packages in the user's chosen Python environment. ALWAYS call configure_python_environment before using this tool. IMPORTANT: This tool should only be used to install Python packages using package managers like pip or conda (works with any Python environment: venv, virtualenv, pipenv, poetry, pyenv, pixi, conda, etc.). Do not use this tool to install npm packages, system packages (apt/brew/yum), Ruby gems, or any other non-Python dependencies.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "packageList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "The list of Python packages to install."
+                },
+                "resourcePath": {
+                    "type": "string",
+                    "description": "The path to the Python file or workspace into which the packages are installed. If not provided, the current workspace will be used. Where possible pass the path to the file or workspace."
+                }
+            },
+            "required": [
+                "packageList"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "evaluateExpressionInDebugSession",
+        "description": "Evaluate an expression in a specific debug session",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "debugSessionId": {
+                    "type": "number",
+                    "description": "The ID of the debug session to evaluate the expression in"
+                },
+                "expression": {
+                    "type": "string",
+                    "description": "The expression to evaluate in the debug session"
+                }
+            },
+            "required": [
+                "debugSessionId",
+                "expression"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "listDebugSessions",
+        "description": "List all active debug sessions with their IDs, names, and expression language IDs",
+        "parameters": {
+            "type": "object",
+            "properties": {}
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "activate_pull_request_review_tools",
+        "description": "Call this tool when you need access to a new category of tools. The category of tools is described as follows:\n\nThis group of tools is focused on managing pull request reviews within GitHub repositories. Users can add comments to pending reviews, create new reviews, submit existing reviews, or delete pending reviews. The tools facilitate interaction with pull requests by allowing users to comment on issues or pull requests, ensuring that feedback can be provided effectively. These tools are essential for collaborative coding environments where multiple developers review and provide input on code changes before they are merged into the main codebase.\n\nBe sure to call this tool if you need a capability related to the above.",
+        "parameters": {},
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "activate_pull_request_management_tools",
+        "description": "Call this tool when you need access to a new category of tools. The category of tools is described as follows:\n\nThis collection of tools is designed for creating and managing pull requests in GitHub repositories. Users can create new branches, initiate pull requests, and even delegate tasks to GitHub Copilot for automated code implementation. Additionally, the tools allow for listing existing pull requests and merging them once they have been reviewed. This group is crucial for developers looking to streamline their workflow, enhance collaboration, and ensure that code changes are properly reviewed and integrated into projects.\n\nBe sure to call this tool if you need a capability related to the above.",
+        "parameters": {},
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "activate_file_management_tools",
+        "description": "Call this tool when you need access to a new category of tools. The category of tools is described as follows:\n\nThis group provides essential file management capabilities within GitHub repositories. Users can retrieve the contents of files or directories and delete files as needed. These tools are vital for maintaining the integrity of a codebase, allowing developers to manage files effectively, whether they need to remove outdated files or access specific content for review or modification. Together, these tools enable efficient file handling and contribute to a well-organized repository.\n\nBe sure to call this tool if you need a capability related to the above.",
+        "parameters": {},
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "activate_repository_information_tools",
+        "description": "Call this tool when you need access to a new category of tools. The category of tools is described as follows:\n\nThis set of tools is focused on retrieving various types of information from GitHub repositories. Users can access details about commits, labels, releases, and issues, as well as information about their own GitHub profile. These tools are essential for developers who need to gather insights about the state of a repository, track changes, and manage issues effectively. By providing comprehensive access to repository data, these tools support informed decision-making and enhance project management.\n\nBe sure to call this tool if you need a capability related to the above.",
+        "parameters": {},
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "activate_release_management_tools",
+        "description": "Call this tool when you need access to a new category of tools. The category of tools is described as follows:\n\nThis group of tools is dedicated to managing releases within GitHub repositories. Users can retrieve specific releases by tag name and list all available tags. These tools are important for developers who need to track versioning and manage the deployment of software. By utilizing these tools, teams can ensure that they are working with the correct versions of their code and can easily access historical releases for reference or rollback purposes.\n\nBe sure to call this tool if you need a capability related to the above.",
+        "parameters": {},
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "activate_search_and_discovery_tools",
+        "description": "Call this tool when you need access to a new category of tools. The category of tools is described as follows:\n\nThis collection of tools is designed for searching and discovering content across GitHub. Users can search for code, repositories, and users, making it easier to locate specific projects, find collaborators, or explore code patterns. These tools enhance the ability to navigate the vast amount of information available on GitHub, allowing developers to quickly find relevant resources and connect with other contributors. This group is essential for fostering collaboration and improving productivity in software development.\n\nBe sure to call this tool if you need a capability related to the above.",
+        "parameters": {},
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "activate_branch_and_commit_tools",
+        "description": "Call this tool when you need access to a new category of tools. The category of tools is described as follows:\n\nThis group focuses on managing branches and commits within GitHub repositories. Users can list branches and retrieve commit histories for specific branches, providing insights into the development process and changes made over time. These tools are crucial for developers who need to track progress, understand the evolution of their code, and manage multiple lines of development. By utilizing these tools, teams can maintain a clear overview of their project’s history and ensure effective collaboration across different branches.\n\nBe sure to call this tool if you need a capability related to the above.",
+        "parameters": {},
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "mcp_github_assign_copilot_to_issue",
+        "description": "Assign Copilot to a specific issue in a GitHub repository.\n\nThis tool can help with the following outcomes:\n- a Pull Request created with source code changes to resolve the issue\n\n\nMore information can be found at:\n- https://docs.github.com/en/copilot/using-github-copilot/using-copilot-coding-agent-to-work-on-tasks/about-assigning-tasks-to-copilot\n",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "base_ref": {
+                    "type": "string",
+                    "description": "Git reference (e.g., branch) that the agent will start its work from. If not specified, defaults to the repository's default branch"
+                },
+                "custom_instructions": {
+                    "type": "string",
+                    "description": "Optional custom instructions to guide the agent beyond the issue body. Use this to provide additional context, constraints, or guidance that is not captured in the issue description"
+                },
+                "issue_number": {
+                    "type": "number",
+                    "description": "Issue number"
+                },
+                "owner": {
+                    "type": "string",
+                    "description": "Repository owner"
+                },
+                "repo": {
+                    "type": "string",
+                    "description": "Repository name"
+                }
+            },
+            "required": [
+                "owner",
+                "repo",
+                "issue_number"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "mcp_github_create_or_update_file",
+        "description": "Create or update a single file in a GitHub repository. \nIf updating, you should provide the SHA of the file you want to update. Use this tool to create or update a file in a GitHub repository remotely; do not use it for local file operations.\n\nIn order to obtain the SHA of original file version before updating, use the following git command:\ngit rev-parse <branch>:<path to file>\n\nSHA MUST be provided for existing file updates.\n",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "branch": {
+                    "type": "string",
+                    "description": "Branch to create/update the file in"
+                },
+                "content": {
+                    "type": "string",
+                    "description": "Content of the file"
+                },
+                "message": {
+                    "type": "string",
+                    "description": "Commit message"
+                },
+                "owner": {
+                    "type": "string",
+                    "description": "Repository owner (username or organization)"
+                },
+                "path": {
+                    "type": "string",
+                    "description": "Path where to create/update the file"
+                },
+                "repo": {
+                    "type": "string",
+                    "description": "Repository name"
+                },
+                "sha": {
+                    "type": "string",
+                    "description": "The blob SHA of the file being replaced. Required if the file already exists."
+                }
+            },
+            "required": [
+                "owner",
+                "repo",
+                "path",
+                "content",
+                "message",
+                "branch"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "mcp_github_fork_repository",
+        "description": "Fork a GitHub repository to your account or specified organization",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "organization": {
+                    "type": "string",
+                    "description": "Organization to fork to"
+                },
+                "owner": {
+                    "type": "string",
+                    "description": "Repository owner"
+                },
+                "repo": {
+                    "type": "string",
+                    "description": "Repository name"
+                }
+            },
+            "required": [
+                "owner",
+                "repo"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "mcp_github_get_copilot_job_status",
+        "description": "Get the status of a GitHub Copilot coding agent job. Use this to check if a previously submitted task has completed and to get the pull request URL once it's created. Provide the job ID (from create_pull_request_with_copilot) or pull request number (from assign_copilot_to_issue), or any pull request you want agent sessions for.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "Job ID or pull request number"
+                },
+                "owner": {
+                    "type": "string",
+                    "description": "Repository owner"
+                },
+                "repo": {
+                    "type": "string",
+                    "description": "Repository name"
+                }
+            },
+            "required": [
+                "owner",
+                "repo",
+                "id"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "mcp_github_get_teams",
+        "description": "Get details of the teams the user is a member of. Limited to organizations accessible with current credentials",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "user": {
+                    "type": "string",
+                    "description": "Username to get teams for. If not provided, uses the authenticated user."
+                }
+            }
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "mcp_github_push_files",
+        "description": "Push multiple files to a GitHub repository in a single commit",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "branch": {
+                    "type": "string",
+                    "description": "Branch to push to"
+                },
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "content": {
+                                "type": "string",
+                                "description": "file content"
+                            },
+                            "path": {
+                                "type": "string",
+                                "description": "path to the file"
+                            }
+                        },
+                        "required": [
+                            "path",
+                            "content"
+                        ]
+                    },
+                    "description": "Array of file objects to push, each object with path (string) and content (string)"
+                },
+                "message": {
+                    "type": "string",
+                    "description": "Commit message"
+                },
+                "owner": {
+                    "type": "string",
+                    "description": "Repository owner"
+                },
+                "repo": {
+                    "type": "string",
+                    "description": "Repository name"
+                }
+            },
+            "required": [
+                "owner",
+                "repo",
+                "branch",
+                "files",
+                "message"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "mcp_github_run_secret_scanning",
+        "description": "Scan files, content, or recent changes for secrets such as API keys, passwords, tokens, and credentials.\n\nThis tool is intended for targeted scans of specific files, snippets, or diffs provided directly as content. It accepts file contents or diffs and returns detected secrets with their locations and related secret scanning metadata. Content must not be empty. For full repository scanning, other mechanisms are available.\n\nCaveats:\n\n- Only files within the codebase should be scanned. Files outside of the codebase should not be sent.\n- Files listed in .gitignore should be skipped.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Array of file contents, snippets, or diff hunks to scan for secrets. These must be raw contents, not repository file paths.",
+                    "minItems": 1,
+                    "maxItems": 100
+                },
+                "owner": {
+                    "type": "string",
+                    "description": "Repository owner"
+                },
+                "repo": {
+                    "type": "string",
+                    "description": "Repository name"
+                }
+            },
+            "required": [
+                "files",
+                "owner",
+                "repo"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "mcp_github_search_pull_requests",
+        "description": "Search for pull requests in GitHub repositories using issues search syntax already scoped to is:pr",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "order": {
+                    "type": "string",
+                    "description": "Sort order",
+                    "enum": [
+                        "asc",
+                        "desc"
+                    ]
+                },
+                "owner": {
+                    "type": "string",
+                    "description": "Optional repository owner. If provided with repo, only pull requests for this repository are listed."
+                },
+                "page": {
+                    "type": "number",
+                    "description": "Page number for pagination (min 1)",
+                    "minimum": 1
+                },
+                "perPage": {
+                    "type": "number",
+                    "description": "Results per page for pagination (min 1, max 100)",
+                    "minimum": 1,
+                    "maximum": 100
+                },
+                "query": {
+                    "type": "string",
+                    "description": "Search query using GitHub pull request search syntax"
+                },
+                "repo": {
+                    "type": "string",
+                    "description": "Optional repository name. If provided with owner, only pull requests for this repository are listed."
+                },
+                "sort": {
+                    "type": "string",
+                    "description": "Sort field by number of matches of categories, defaults to best match",
+                    "enum": [
+                        "comments",
+                        "reactions",
+                        "reactions-+1",
+                        "reactions--1",
+                        "reactions-smile",
+                        "reactions-thinking_face",
+                        "reactions-heart",
+                        "reactions-tada",
+                        "interactions",
+                        "created",
+                        "updated"
+                    ]
+                }
+            },
+            "required": [
+                "query"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "activate_git_branch_management_tools",
+        "description": "Call this tool when you need access to a new category of tools. The category of tools is described as follows:\n\nThis group of tools is focused on managing Git branches and worktrees, providing essential functionalities for version control in software development. The tools allow users to list or create branches, switch between them, and restore files in the working tree. By using 'git branch', developers can effectively manage their project's branching strategy, while 'git checkout' enables them to navigate between different branches seamlessly. Additionally, 'git log' and 'git diff' provide insights into commit history and changes, which are crucial for understanding project evolution and debugging. The 'git status' tool helps users keep track of their working tree's state, ensuring they are aware of any uncommitted changes. Lastly, the ability to manage worktrees with 'git worktree' allows for more flexible development workflows, enabling multiple branches to be checked out simultaneously in different directories. Together, these tools streamline the branching and version control process, enhancing collaboration and productivity in software projects.\n\nBe sure to call this tool if you need a capability related to the above.",
+        "parameters": {},
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "activate_pull_request_management_tools_2",
+        "description": "Call this tool when you need access to a new category of tools. The category of tools is described as follows:\n\nThis group of tools is designed to enhance the workflow around pull requests (PRs) and commit organization. The 'Gitlens Commit Composer' allows users to structure their changes into well-defined commits, which is particularly useful for breaking down large changes into manageable pieces with clear messages. The 'Gitlens Launchpad' prioritizes open pull requests based on their status, helping users focus on what needs attention, whether it's merging, resolving conflicts, or awaiting review. The 'Gitlens Start Review' tool creates a dedicated worktree for reviewing PRs with the assistance of an AI agent, streamlining the review process. Additionally, the 'Gitlens Start Work' tool facilitates the creation of branches linked to specific issues, ensuring that context is maintained throughout the development process. Finally, the 'Create a review for a pull request' tool allows users to initiate formal reviews, ensuring that code quality and collaboration are upheld. Collectively, these tools provide a robust framework for managing pull requests and improving collaboration within development teams.\n\nBe sure to call this tool if you need a capability related to the above.",
+        "parameters": {},
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "activate_pull_request_commenting_tools",
+        "description": "Call this tool when you need access to a new category of tools. The category of tools is described as follows:\n\nThis group of tools is designed to facilitate interaction with pull requests in GitKraken, specifically focusing on commenting functionalities. The tools allow users to add comments to issues and pull requests, fostering communication and collaboration among team members during the code review process. By using 'add comment to an issue', developers can provide feedback or ask questions directly related to specific tasks or bugs. The ability to retrieve all comments in a pull request through 'get comments in a pull request' enables users to review discussions and decisions made during the review process. Additionally, 'get specific pull request' allows users to access detailed information about a particular pull request, including its status and associated comments. Together, these tools enhance the collaborative aspect of code reviews, ensuring that all team members can contribute to discussions and maintain a clear understanding of the code changes being proposed.\n\nBe sure to call this tool if you need a capability related to the above.",
+        "parameters": {},
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "activate_personal_issue_and_pull_request_management_tools",
+        "description": "Call this tool when you need access to a new category of tools. The category of tools is described as follows:\n\nThis group of tools is tailored for individual developers to manage their assigned issues and pull requests within GitKraken. The tools provide functionalities to fetch issues that are specifically assigned to the user, allowing them to prioritize their workload effectively. By using 'fetch issues assigned to me', developers can quickly identify tasks that require their attention, ensuring that they stay organized and focused on their responsibilities. Similarly, the tools enable users to search for pull requests where they are the assignee, author, or reviewer, streamlining the process of tracking their contributions and responsibilities in collaborative projects. This targeted approach to managing issues and pull requests helps developers maintain clarity in their tasks and enhances their ability to contribute effectively to team efforts. Overall, these tools empower individual developers to take charge of their work, ensuring that they can efficiently navigate their assigned tasks and participate in the code review process.\n\nBe sure to call this tool if you need a capability related to the above.",
+        "parameters": {},
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "mcp_gitkraken_git_add_or_commit",
+        "description": "Add file contents to the index (git add <pathspec>) OR record changes to the repository (git commit -m <message> [files...]). Use the 'action' parameter to specify which action to perform.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "description": "The action to perform: 'add' or 'commit'",
+                    "enum": [
+                        "add",
+                        "commit"
+                    ],
+                    "type": "string"
+                },
+                "directory": {
+                    "description": "The directory to run git add or commit in",
+                    "type": "string"
+                },
+                "files": {
+                    "description": "Optional array of files to add or commit. If omitted, all files are added or all staged changes are committed.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "message": {
+                    "description": "The commit message (required if action is 'commit')",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "directory",
+                "action"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "mcp_gitkraken_git_blame",
+        "description": "Show what revision and author last modified each line of a file (git blame <file>).",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "directory": {
+                    "description": "The directory to run git blame in",
+                    "type": "string"
+                },
+                "file": {
+                    "description": "The file to blame",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "directory",
+                "file"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "mcp_gitkraken_git_push",
+        "description": "Update remote refs along with associated objects (git push).",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "directory": {
+                    "description": "The directory to run git push in",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "directory"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "mcp_gitkraken_git_stash",
+        "description": "Stash the changes in a dirty working directory (git stash).",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "directory": {
+                    "description": "The directory to run git stash in",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Optional name for the stash (used as the stash message)",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "directory"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "renderMermaidDiagram",
+        "description": "Renders a Mermaid diagram from Mermaid.js markup.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "markup": {
+                    "type": "string",
+                    "description": "The mermaid diagram markup to render as a Mermaid diagram. This should only be the markup of the diagram. Do not include a wrapping code block."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "A short title that describes the diagram."
+                }
+            }
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "mcp_github_search_users",
+        "description": "Find GitHub users by username, real name, or other profile information. Useful for locating developers, contributors, or team members.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "order": {
+                    "type": "string",
+                    "description": "Sort order",
+                    "enum": [
+                        "asc",
+                        "desc"
+                    ]
+                },
+                "page": {
+                    "type": "number",
+                    "description": "Page number for pagination (min 1)",
+                    "minimum": 1
+                },
+                "perPage": {
+                    "type": "number",
+                    "description": "Results per page for pagination (min 1, max 100)",
+                    "minimum": 1,
+                    "maximum": 100
+                },
+                "query": {
+                    "type": "string",
+                    "description": "User search query. Examples: 'john smith', 'location:seattle', 'followers:>100'. Search is automatically scoped to type:user."
+                },
+                "sort": {
+                    "type": "string",
+                    "description": "Sort users by number of followers or repositories, or when the person joined GitHub.",
+                    "enum": [
+                        "followers",
+                        "repositories",
+                        "joined"
+                    ]
+                }
+            },
+            "required": [
+                "query"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "mcp_github_search_repositories",
+        "description": "Find GitHub repositories by name, description, readme, topics, or other metadata. Perfect for discovering projects, finding examples, or locating specific repositories across GitHub.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "minimal_output": {
+                    "type": "boolean",
+                    "description": "Return minimal repository information (default: true). When false, returns full GitHub API repository objects.",
+                    "default": true
+                },
+                "order": {
+                    "type": "string",
+                    "description": "Sort order",
+                    "enum": [
+                        "asc",
+                        "desc"
+                    ]
+                },
+                "page": {
+                    "type": "number",
+                    "description": "Page number for pagination (min 1)",
+                    "minimum": 1
+                },
+                "perPage": {
+                    "type": "number",
+                    "description": "Results per page for pagination (min 1, max 100)",
+                    "minimum": 1,
+                    "maximum": 100
+                },
+                "query": {
+                    "type": "string",
+                    "description": "Repository search query. Examples: 'machine learning in:name stars:>1000 language:python', 'topic:react', 'user:facebook'. Supports advanced search syntax for precise filtering."
+                },
+                "sort": {
+                    "type": "string",
+                    "description": "Sort repositories by field, defaults to best match",
+                    "enum": [
+                        "stars",
+                        "forks",
+                        "help-wanted-issues",
+                        "updated"
+                    ]
+                }
+            },
+            "required": [
+                "query"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "mcp_github_get_me",
+        "description": "Get details of the authenticated GitHub user. Use this when a request is about the user's own profile for GitHub. Or when information is missing to build other tool calls.",
+        "parameters": {
+            "type": "object",
+            "properties": {}
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "mcp_gitkraken_pull_request_assigned_to_me",
+        "description": "Search pull requests where you are the assignee, author, or reviewer",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "azure_project": {
+                    "description": "Optionally set the Azure DevOps project name of the pull request. Required for Azure DevOps",
+                    "type": "string"
+                },
+                "is_closed": {
+                    "description": "Set to true if you want to search for closed pull requests",
+                    "type": "boolean"
+                },
+                "page": {
+                    "description": "Optional parameter to specify the page number, defaults to 1",
+                    "type": "number"
+                },
+                "provider": {
+                    "description": "Specify the git provider",
+                    "enum": [
+                        "github",
+                        "gitlab",
+                        "bitbucket",
+                        "azure"
+                    ],
+                    "type": "string"
+                },
+                "repository_name": {
+                    "description": "Set the repository name of the pull request. Required for Azure DevOps and Bitbucket",
+                    "type": "string"
+                },
+                "repository_organization": {
+                    "description": "Set the organization name of the pull request. Required for Azure DevOps and Bitbucket",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "provider"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "mcp_gitkraken_issues_assigned_to_me",
+        "description": "Fetch issues assigned to the user",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "azure_organization": {
+                    "description": "Optionally set the Azure DevOps organization name. Required for Azure DevOps",
+                    "type": "string"
+                },
+                "azure_project": {
+                    "description": "Optionally set the Azure DevOps project name. Required for Azure DevOps",
+                    "type": "string"
+                },
+                "page": {
+                    "description": "Optional parameter to specify the page number, defaults to 1",
+                    "type": "number"
+                },
+                "provider": {
+                    "description": "Specify the issue provider",
+                    "enum": [
+                        "github",
+                        "gitlab",
+                        "jira",
+                        "azure",
+                        "linear"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "provider"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "mcp_gitkraken_pull_request_create",
+        "description": "Create a new pull request",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "azure_project": {
+                    "description": "Optionally set the Azure DevOps project name of the pull request. Required for Azure DevOps",
+                    "type": "string"
+                },
+                "body": {
+                    "description": "The body/description of the pull request",
+                    "type": "string"
+                },
+                "is_draft": {
+                    "description": "Create as draft pull request",
+                    "type": "boolean"
+                },
+                "provider": {
+                    "description": "Specify the git provider",
+                    "enum": [
+                        "github",
+                        "gitlab",
+                        "bitbucket",
+                        "azure"
+                    ],
+                    "type": "string"
+                },
+                "repository_name": {
+                    "description": "Set the repository name of the pull request. Required for Azure DevOps and Bitbucket",
+                    "type": "string"
+                },
+                "repository_organization": {
+                    "description": "Set the organization name of the pull request. Required for Azure DevOps and Bitbucket",
+                    "type": "string"
+                },
+                "source_branch": {
+                    "description": "Source branch from which the pull request will be created",
+                    "type": "string"
+                },
+                "target_branch": {
+                    "description": "Target branch where the pull request will be merged",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "The title of the pull request",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "repository_name",
+                "repository_organization",
+                "title",
+                "source_branch",
+                "target_branch",
+                "provider"
+            ]
+        },
+        "type": "function",
+        "strict": false
+    },
+    {
+        "name": "mcp_gitkraken_gitkraken_workspace_list",
+        "description": " Lists all Gitkraken workspaces",
+        "parameters": {
+            "type": "object",
+            "properties": {}
+        },
+        "type": "function",
+        "strict": false
+    }
+]
+</details>
+</code></pre>
+## Request Messages
+### System
+~~~md
+You are an expert AI programming assistant, working with a user in the VS Code editor.
+Your name is GitHub Copilot. When asked about the model you are using, state that you are using GPT-5.4.
+Follow Microsoft content policies.
+Avoid content that violates copyrights.
+If you are asked to generate content that is harmful, hateful, racist, sexist, lewd, or violent, only respond with "Sorry, I can't assist with that."
+<coding_agent_instructions>
+You are a coding agent running in VS Code. You are expected to be precise, safe, and helpful.
+
+Your capabilities:
+
+- Receive user prompts and other context provided by the workspace, such as files in the environment.
+- Communicate with the user by streaming thinking & responses, and by making & updating plans.
+- Emit function calls to run terminal commands and apply patches.
+</coding_agent_instructions>
+<personality>
+You are a deeply pragmatic, effective software engineer. You take engineering quality seriously, and collaboration comes through as direct, factual statements. You communicate efficiently, keeping the user clearly informed about ongoing actions without unnecessary detail.
+
+</personality>
+<values>
+You are guided by these core values:
+- Clarity: You communicate reasoning explicitly and concretely, so decisions and tradeoffs are easy to evaluate upfront.
+- Pragmatism: You keep the end goal and momentum in mind, focusing on what will actually work and move things forward to achieve the user's goal.
+- Rigor: You expect technical arguments to be coherent and defensible, and you surface gaps or weak assumptions politely with emphasis on creating clarity and moving the task forward.
+
+</values>
+<interaction_style>
+You communicate concisely and respectfully, focusing on the task at hand. You always prioritize actionable guidance, clearly stating assumptions, environment prerequisites, and next steps. Unless explicitly asked, you avoid excessively verbose explanations about your work.
+You avoid cheerleading, motivational language, or artificial reassurance, or any kind of fluff. You don't comment on user requests, positively or negatively, unless there is reason for escalation. You don't feel like you need to fill the space with words, you stay concise and communicate what is necessary for user collaboration - not more, not less.
+
+</interaction_style>
+<escalation>
+You may challenge the user to raise their technical bar, but you never patronize or dismiss their concerns. When presenting an alternative approach or solution to the user, you explain the reasoning behind the approach, so your thoughts are demonstrably correct. You maintain a pragmatic mindset when discussing these tradeoffs, and so are willing to work with the user after concerns have been noted.
+
+</escalation>
+<general>
+As an expert coding agent, your primary focus is writing code, answering questions, and helping the user complete their task in the current environment. You build context by examining the codebase first without making assumptions or jumping to conclusions. You think through the nuances of the code you encounter, and embody the mentality of a skilled senior software engineer.
+- When searching for text or files, prefer using `rg` or `rg --files` respectively because `rg` is much faster than alternatives like `grep`. (If the `rg` command is not found, then use alternatives.)
+- Parallelize tool calls whenever possible - especially file reads, such as `cat`, `rg`, `sed`, `ls`, `git show`, `nl`, `wc`. Never chain together bash commands with separators like `echo "====";` as this renders to the user poorly.
+
+</general>
+<editing_constraints>
+- Default to ASCII when editing or creating files. Only introduce non-ASCII or other Unicode characters when there is a clear justification and the file already uses them.
+- Add succinct code comments that explain what is going on if code is not self-explanatory. You should not add comments like "Assigns the value to the variable", but a brief comment might be useful ahead of a complex code block that the user would otherwise have to spend time parsing out. Usage of these comments should be rare.
+- Always use apply_patch for manual code edits. Do not use cat or any other commands when creating or editing files. Formatting commands or bulk edits don't need to be done with apply_patch.
+- Do not use Python to read/write files when a simple shell command or apply_patch would suffice.
+- You may be in a dirty git worktree.
+* NEVER revert existing changes you did not make unless explicitly requested, since these changes were made by the user.
+* If asked to make a commit or code edits and there are unrelated changes to your work or changes that you didn't make in those files, don't revert those changes.
+* If the changes are in files you've touched recently, you should read carefully and understand how you can work with the changes rather than reverting them.
+* If the changes are in unrelated files, just ignore them and don't revert them.
+- Do not amend a commit unless explicitly requested to do so.
+- While you are working, you might notice unexpected changes that you didn't make. It's likely the user made them, or were autogenerated. If they directly conflict with your current task, stop and ask the user how they would like to proceed. Otherwise, focus on the task at hand.
+- **NEVER** use destructive commands like `git reset --hard` or `git checkout --` unless specifically requested or approved by the user.
+- You struggle using the git interactive console. **ALWAYS** prefer using non-interactive git commands.
+
+</editing_constraints>
+<special_user_requests>
+If the user makes a simple request (such as asking for the time) which you can fulfill by running a terminal command (such as `date`), you should do so.
+- If the user asks for a "review", default to a code review mindset: prioritise identifying bugs, risks, behavioural regressions, and missing tests. Findings must be the primary focus of the response - keep summaries or overviews brief and only after enumerating the issues. Present findings first (ordered by severity with file/line references), follow with open questions or assumptions, and offer a change-summary only as a secondary detail. If no findings are discovered, state that explicitly and mention any residual risks or testing gaps.
+- Unless the user explicitly asks for a plan, asks a question about the code, is brainstorming potential solutions, or some other intent that makes it clear that code should not be written, assume the user wants you to make code changes or run tools to solve the user's problem. In these cases, it's bad to output your proposed solution in a message, you should go ahead and actually implement the change. If you encounter challenges or blockers, you should attempt to resolve them yourself.
+
+</special_user_requests>
+<special_formatting>
+Use KaTeX for math equations in your answers.
+Wrap inline math equations in $.
+Wrap more complex blocks of math equations in $$.
+
+</special_formatting>
+<applyPatchInstructions>
+To edit files in the workspace, use the apply_patch tool. If you have issues with it, you should first try to fix your patch and continue using apply_patch. 
+Prefer the smallest set of changes needed to satisfy the task. Avoid reformatting unrelated code; preserve existing style and public APIs unless the task requires changes. When practical, complete all edits for a file within a single message.
+The input for this tool is a string representing the patch to apply, following a special format. For each snippet of code that needs to be changed, repeat the following:
+*** Update File: [file_path]
+[context_before] -> See below for further instructions on context.
+-[old_code] -> Precede each line in the old code with a minus sign.
++[new_code] -> Precede each line in the new, replacement code with a plus sign.
+[context_after] -> See below for further instructions on context.
+
+For instructions on [context_before] and [context_after]:
+- By default, show 3 lines of code immediately above and 3 lines immediately below each change. If a change is within 3 lines of a previous change, do NOT duplicate the first change's [context_after] lines in the second change's [context_before] lines.
+- If 3 lines of context is insufficient to uniquely identify the snippet of code within the file, use the @@ operator to indicate the class or function to which the snippet belongs.
+- If a code block is repeated so many times in a class or function such that even a single @@ statement and 3 lines of context cannot uniquely identify the snippet of code, you can use multiple `@@` statements to jump to the right context.
+You must use the same indentation style as the original code. If the original code uses tabs, you must use tabs. If the original code uses spaces, you must use spaces. Be sure to use a proper UNESCAPED tab character.
+
+See below for an example of the patch format. If you propose changes to multiple regions in the same file, you should repeat the *** Update File header for each snippet of code to change:
+
+*** Begin Patch
+*** Update File: c:\Users\someone\pygorithm\searching\binary_search.py
+@@ class BaseClass
+@@   def method():
+[3 lines of pre-context]
+-[old_code]
++[new_code]
++[new_code]
+[3 lines of post-context]
+*** End Patch
+
+NEVER print this out to the user, instead call the tool and the edits will be applied and shown to the user.
+Follow best practices when editing files. If a popular external library exists to solve a problem, use it and properly install the package e.g. with "npm install" or creating a "requirements.txt".
+If you're building a webapp from scratch, give it a beautiful and modern UI.
+After editing a file, any new errors in the file will be in the tool result. Fix the errors if they are relevant to your change or the prompt, and if you can figure out how to fix them, and remember to validate that they were actually fixed. Do not loop more than 3 times attempting to fix errors in the same file. If the third try fails, you should stop and ask the user what to do next.
+
+</applyPatchInstructions>
+<frontend_tasks>
+When doing frontend design tasks, avoid collapsing into "AI slop" or safe, average-looking layouts.
+Aim for interfaces that feel intentional, bold, and a bit surprising.
+- Typography: Use expressive, purposeful fonts and avoid default stacks (Inter, Roboto, Arial, system).
+- Color & Look: Choose a clear visual direction; define CSS variables; avoid purple-on-white defaults. No purple bias or dark mode bias.
+- Motion: Use a few meaningful animations (page-load, staggered reveals) instead of generic micro-motions.
+- Background: Don't rely on flat, single-color backgrounds; use gradients, shapes, or subtle patterns to build atmosphere.
+- Ensure the page loads properly on both desktop and mobile
+- For React code, prefer modern patterns including useEffectEvent, startTransition, and useDeferredValue when appropriate if used by the team. Do not add useMemo/useCallback by default unless already used; follow the repo's React Compiler guidance.
+- Overall: Avoid boilerplate layouts and interchangeable UI patterns. Vary themes, type families, and visual languages across outputs.
+Exception: If working within an existing website or design system, preserve the established patterns, structure, and visual language
+
+</frontend_tasks>
+<working_with_the_user>
+You have 2 ways of communicating with the users:
+- Share intermediary updates in `commentary` channel.
+- After you have completed all your work, send a message to the `final` channel.
+You are producing plain text that will later be styled by the program you run in. Formatting should make results easy to scan, but not feel mechanical. Use judgment to decide how much structure adds value. Follow the formatting rules exactly.
+
+</working_with_the_user>
+<formatting_rules>
+- You may format with GitHub-flavored Markdown.
+- Structure your answer if necessary, the complexity of the answer should match the task. If the task is simple, your answer should be a one-liner. Order sections from general to specific to supporting.
+- Never use nested bullets. Keep lists flat (single level). If you need hierarchy, split into separate lists or sections or if you use : just include the line you might usually render using a nested bullet immediately after it. For numbered lists, only use the `1. 2. 3.` style markers (with a period), never `1)`.
+- Headers are optional, only use them when you think they are necessary. If you do use them, use short Title Case (1-3 words) wrapped in **…**. Don't add a blank line.
+- Use monospace commands/paths/env vars/code ids, inline examples, and literal keyword bullets by wrapping them in backticks.
+- Code samples or multi-line snippets should be wrapped in fenced code blocks. Include an info string as often as possible.
+- File References: When referencing files in your response follow the below rules:
+* Use markdown links (not inline code) for clickable file paths.
+* Each reference should have a stand alone path. Even if it's the same file.
+* For clickable/openable file references, the path target must be an absolute filesystem path. Labels may be short (for example, `[app.ts](/abs/path/app.ts)`).
+* Optionally include line/column (1‑based): :line[:column] or #Lline[Ccolumn] (column defaults to 1).
+* Do not use URIs like file://, vscode://, or https://.
+* Do not provide range of lines
+- Don’t use emojis or em dash unless explicitly instructed.
+
+</formatting_rules>
+<final_answer_instructions>
+Always favor conciseness in your final answer - you should usually avoid long-winded explanations and focus only on the most important details. For casual chit-chat, just chat. For simple or single-file tasks, prefer 1-2 short paragraphs plus an optional short verification line. Do not default to bullets. On simple tasks, prose is usually better than a list, and if there are only one or two concrete changes you should almost always keep the close-out fully in prose.
+On larger tasks, use at most 2-3 high-level sections when helpful. Each section can be a short paragraph or a few flat bullets. Prefer grouping by major change area or user-facing outcome, not by file or edit inventory. If the answer starts turning into a changelog, compress it: cut file-by-file detail, repeated framing, low-signal recap, and optional follow-up ideas before cutting outcome, verification, or real risks. Only dive deeper into one aspect of the code change if it's especially complex, important, or if the users asks about it. This also holds true for PR explanations, codebase walkthroughs, or architectural decisions: provide a high-level walkthrough unless specifically asked and cap answers at 2-3 sections.
+Requirements for your final answer:
+- Prefer short paragraphs by default.
+- When explaining something, optimize for fast, high-level comprehension rather than completeness-by-default.
+- Use lists only when the content is inherently list-shaped: enumerating distinct items, steps, options, categories, comparisons, ideas. Do not use lists for opinions or straightforward explanations that would read more naturally as prose. If a short paragraph can answer the question more compactly, prefer prose over bullets or multiple sections.
+- Do not turn simple explanations into outlines or taxonomies unless the user asks for depth. If a list is used, each bullet should be a complete standalone point.
+- Do not begin responses with conversational interjections or meta commentary. Avoid openers such as acknowledgements (“Done —”, “Got it”, “Great question, ”, "You're right to call that out") or framing phrases.
+- The user does not see command execution outputs. When asked to show the output of a command (e.g. `git show`), relay the important details in your answer or summarize the key lines so the user understands the result.
+- Never tell the user to "save/copy this file", the user is on the same machine and has access to the same files as you have.
+- If the user asks for a code explanation, include code references as appropriate.
+- If you weren't able to do something, for example run tests, tell the user.
+- If there are natural next steps the user may want to take, suggest them at the end of your response. Do not make suggestions if there are no natural next steps. When suggesting multiple options, use numeric lists for the suggestions so the user can quickly respond with a single number.
+- Never use nested bullets. Keep lists flat (single level). If you need hierarchy, split into separate lists or sections or if you use : just include the line you might usually render using a nested bullet immediately after it. For numbered lists, only use the `1. 2. 3.` style markers (with a period), never `1)`.
+
+</final_answer_instructions>
+<intermediary_updates>
+- Intermediary updates go to the `commentary` channel.
+- User updates are short updates while you are working, they are NOT final answers.
+- You use 1-2 sentence user updates to communicated progress and new information to the user as you are doing work.
+- Do not begin responses with conversational interjections or meta commentary. Avoid openers such as acknowledgements (“Done —”, “Got it”, “Great question, ”) or framing phrases.
+- Before exploring or doing substantial work, you start with a user update acknowledging the request and explaining your first step. You should include your understanding of the user request and explain what you will do. Avoid commenting on the request or using starters such at "Got it -" or "Understood -" etc.
+- You provide user updates frequently, every 30s.
+- When exploring, e.g. searching, reading files you provide user updates as you go, explaining what context you are gathering and what you've learned. Vary your sentence structure when providing these updates to avoid sounding repetitive - in particular, don't start each sentence the same way.
+- When working for a while, keep updates informative and varied, but stay concise.
+- After you have sufficient context, and the work is substantial you provide a longer plan (this is the only user update that may be longer than 2 sentences and can contain formatting).
+- Before performing file edits of any kind, you provide updates explaining what edits you are making.
+- As you are thinking, you very frequently provide updates even if not taking any actions, informing the user of your progress. You interrupt your thinking and send multiple updates in a row if thinking for more than 100 words.
+- Tone of your updates MUST match your personality.
+
+</intermediary_updates>
+<task_execution>
+You are a coding agent. You must keep going until the query or task is completely resolved, before ending your turn and yielding back to the user. Persist until the task is fully handled end-to-end within the current turn whenever feasible and persevere even when function calls fail. Only terminate your turn when you are sure that the problem is solved. Autonomously resolve the query to the best of your ability, using the tools available to you, before coming back to the user. Do NOT guess or make up an answer.
+
+You MUST adhere to the following criteria when solving queries:
+- Working on the repo(s) in the current environment is allowed, even if they are proprietary.
+- Analyzing code for vulnerabilities is allowed.
+- Showing user code and tool call details is allowed.
+- Use the apply_patch tool to edit files (NEVER try `applypatch` or `apply-patch`, only `apply_patch`): {"input":"*** Begin Patch\n*** Update File: path/to/file.py\n@@ def example():\n-  pass\n+  return 123\n*** End Patch"}.
+
+If completing the user's task requires writing or modifying files, your code and final answer should follow these coding guidelines, though user instructions (i.e. copilot-instructions.md) may override these guidelines:
+
+- Fix the problem at the root cause rather than applying surface-level patches, when possible.
+- Avoid unneeded complexity in your solution.
+- Do not attempt to fix unrelated bugs or broken tests. It is not your responsibility to fix them. (You may mention them to the user in your final message though.)
+- Update documentation as necessary.
+- Keep changes consistent with the style of the existing codebase. Changes should be minimal and focused on the task.
+- Use `git log` and `git blame` or appropriate tools to search the history of the codebase if additional context is required.
+- NEVER add copyright or license headers unless specifically requested.
+- Do not waste tokens by re-reading files after calling `apply_patch` on them. The tool call will fail if it didn't work. The same goes for making folders, deleting folders, etc.
+- Do not `git commit` your changes or create new git branches unless explicitly requested.
+- Do not add inline comments within code unless explicitly requested.
+- Do not use one-letter variable names unless explicitly requested.
+- NEVER output inline citations like "【F:README.md†L5-L14】" in your outputs. The UI is not able to render these so they will just be broken in the UI. Instead, if you output valid filepaths, users will be able to click on them to open them in their editor.
+- You have access to many tools. If a tool exists to perform a specific task, you MUST use that tool instead of running a terminal command to perform that task.
+
+</task_execution>
+<autonomy_and_persistence>
+Persist until the task is fully handled end-to-end within the current turn whenever feasible: do not stop at analysis or partial fixes; carry changes through implementation, verification, and a clear explanation of outcomes unless the user explicitly says otherwise or redirects you.
+
+</autonomy_and_persistence>
+<fileLinkification>
+When mentioning files or line numbers, always convert them to markdown links using workspace-relative paths and 1-based line numbers.
+NO BACKTICKS ANYWHERE:
+- Never wrap file names, paths, or links in backticks.
+- Never use inline-code formatting for any file reference.
+
+REQUIRED FORMATS:
+- File: [path/file.ts](path/file.ts)
+- Line: [file.ts](file.ts#L10)
+- Range: [file.ts](file.ts#L10-L12)
+
+PATH RULES:
+- Without line numbers: Display text must match the target path.
+- With line numbers: Display text can be either the path or descriptive text.
+- Use '/' only; strip drive letters and external folders.
+- Do not use these URI schemes: file://, vscode://
+- Encode spaces only in the target (My File.md → My%20File.md).
+- Non-contiguous lines require separate links. NEVER use comma-separated line references like #L10-L12, L20.
+- Valid formats: [file.ts](file.ts#L10) only. Invalid: ([file.ts#L10]) or [file.ts](file.ts)#L10
+- Only create links for files that exist in the workspace. Do not link to files you are suggesting to create or that do not exist yet.
+
+USAGE EXAMPLES:
+- With path as display: The handler is in [src/handler.ts](src/handler.ts#L10).
+- With descriptive text: The [widget initialization](src/widget.ts#L321) runs on startup.
+- Bullet list: [Init widget](src/widget.ts#L321)
+- File only: See [src/config.ts](src/config.ts) for settings.
+
+FORBIDDEN (NEVER OUTPUT):
+- Inline code: `file.ts`, `src/file.ts`, `L86`.
+- Plain text file names: file.ts, chatService.ts.
+- References without links when mentioning specific file locations.
+- Specific line citations without links ("Line 86", "at line 86", "on line 25").
+- Combining multiple line references in one link: [file.ts#L10-L12, L20](file.ts#L10-L12, L20)
+
+
+</fileLinkification>
+<memoryInstructions>
+As you work, consult your memory files to build on previous experience. When you encounter a mistake that seems like it could be common, check your memory for relevant notes — and if nothing is written yet, record what you learned.
+
+<memoryScopes>
+Memory is organized into the scopes defined below:
+- **User memory** (`/memories/`): Persistent notes that survive across all workspaces and conversations. Store user preferences, common patterns, frequently used commands, and general insights here. First 200 lines are loaded into your context automatically.
+- **Session memory** (`/memories/session/`): Notes for the current conversation only. Store task-specific context, in-progress notes, and temporary working state here. Session files are listed in your context but not loaded automatically — use the memory tool to read them when needed.
+- **Repository memory** (`/memories/repo/`): Repository-scoped facts stored locally in the workspace. Store codebase conventions, build commands, project structure facts, and verified practices here.
+
+</memoryScopes>
+
+<memoryGuidelines>
+Guidelines for user memory (`/memories/`):
+- Keep entries short and concise — use brief bullet points or single-line facts, not lengthy prose. User memory is loaded into context automatically, so brevity is critical.
+- Organize by topic in separate files (e.g., `debugging.md`, `patterns.md`).
+- Record only key insights: problem constraints, strategies that worked or failed, and lessons learned.
+- Update or remove memories that turn out to be wrong or outdated.
+- Do not create new files unless necessary — prefer updating existing files.
+Guidelines for session memory (`/memories/session/`):
+- Use session memory to keep plans up to date and reviewing historical summaries.
+- Do not create unnecessary session memory files. You should only view and update existing session files.
+
+</memoryGuidelines>
+
+
+</memoryInstructions>
+
+<instructions>
+<skills>
+Here is a list of skills that contain domain specific knowledge on a variety of topics.
+Each skill comes with a description of the topic and a file path that contains the detailed instructions.
+When a user asks you to perform a task that falls within the domain of a skill, use the 'read_file' tool to acquire the full instructions from the file URI.
+<skill>
+<name>beautiful-mermaid</name>
+<description>Render, validate, and harden Mermaid diagrams as SVG and PNG using the Beautiful Mermaid library. Use when the user asks to render a Mermaid diagram or needs Mermaid syntax made compatible with VS Code Markdown preview.</description>
+<file>c:\Users\lsheng2\.copilot\skills\beautiful-mermaid\SKILL.md</file>
+</skill>
+<skill>
+<name>drawio</name>
+<description>Create and edit draw.io diagrams in XML format. Use when the user wants to create flowcharts, architecture diagrams, sequence diagrams, or any visual diagrams. Handles XML structure, styling, fonts (Helvetica), arrows, connectors, and PNG export.</description>
+<file>c:\Users\lsheng2\.copilot\skills\drawio\SKILL.md</file>
+</skill>
+<skill>
+<name>find-skills</name>
+<description>Helps users discover and install agent skills when they ask questions like "how do I do X", "find a skill for X", "is there a skill that can...", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.</description>
+<file>c:\Users\lsheng2\.copilot\skills\find-skills\SKILL.md</file>
+</skill>
+<skill>
+<name>agent-customization</name>
+<description>**WORKFLOW SKILL** — Create, update, review, fix, or debug VS Code agent customization files (.instructions.md, .prompt.md, .agent.md, SKILL.md, copilot-instructions.md, AGENTS.md). USE FOR: saving coding preferences; troubleshooting why instructions/skills/agents are ignored or not invoked; configuring applyTo patterns; defining tool restrictions; creating custom agent modes or specialized workflows; packaging domain knowledge; fixing YAML frontmatter syntax. DO NOT USE FOR: general coding questions (use default agent); runtime debugging or error diagnosis; MCP server configuration (use MCP docs directly); VS Code extension development. INVOKES: file system tools (read/write customization files), ask-questions tool (interview user for requirements), subagents for codebase exploration. FOR SINGLE OPERATIONS: For quick YAML frontmatter fixes or creating a single file from a known pattern, edit the file directly — no skill needed.</description>
+<file>copilot-skill:/agent-customization/SKILL.md</file>
+</skill>
+<skill>
+<name>troubleshoot</name>
+<description>Investigate unexpected chat agent behavior by analyzing direct debug logs in JSONL files. Use when users ask why something happened, why a request was slow, why tools or subagents were used or skipped, or why instructions/skills/agents did not load.</description>
+<file>copilot-skill:/troubleshoot/SKILL.md</file>
+</skill>
+</skills>
+
+
+<agents>
+Here is a list of agents that can be used when running a subagent.
+Each agent has optionally a description with the agent's purpose and expertise. When asked to run a subagent, choose the most appropriate agent from this list.
+Use the 'runSubagent' tool with the agent name to run the subagent.
+<agent>
+<name>Explore</name>
+<description>Fast read-only codebase exploration and Q&A subagent. Prefer over manually chaining multiple search and file-reading operations to avoid cluttering the main conversation. Safe to call in parallel. Specify thoroughness: quick, medium, or thorough.</description>
+<argumentHint>Describe WHAT you're looking for and desired thoroughness (quick/medium/thorough)</argumentHint>
+</agent>
+</agents>
+
+
+</instructions>
+
+
+[copilot_cache_control: { type: 'ephemeral' }]
+~~~
+
+### User
+~~~md
+<environment_info>
+The user's current OS is: Windows
+</environment_info>
+<workspace_info>
+There is no workspace currently open.
+</workspace_info>
+<userMemory>
+The following are your persistent user memory notes. These persist across all workspaces and conversations.
+
+## debugging.md
+- High-priority bug workflow trigger: if user reports regression/500 after a fix, immediately classify task as high-priority-bug and run layered validation (backend regression -> API -> Playwright e2e) before declaring fixed.
+- For datetime-scoped filtering in FastAPI/SQLAlchemy paths, normalize aware/naive datetimes before comparisons to avoid production-only 500s.
+- Mermaid postmortem rule: for VS Code Markdown preview compatibility, prefer quoted node/subgraph labels, use <br/> instead of literal \\n for flowchart node line breaks, and avoid combining dotted edges with extra inline prose; use intermediate note nodes when the relationship needs explanation.
+- Skill maintenance rule: if a failure exposes a reusable authoring or validation pattern and an existing skill already owns that domain, prefer updating that skill instead of creating a separate overlapping skill.
+- Mermaid sequenceDiagram rule: in VS Code Markdown preview, avoid using `rect rgb(...)` grouping blocks for side-by-side/path comparison diagrams; prefer splitting into two smaller sequence diagrams with short labels, and re-check docs/mermaid-safe-writing.md before adding complex Mermaid syntax.
+
+- Mermaid flowchart label rule: avoid literal [] or {} inside node label delimiters like A[...] or B{...}; if label text must contain brackets, quote the whole label or escape it, otherwise VS Code Mermaid preview may misparse the delimiter boundary.
+
+- Mermaid naming rule: never use Mermaid reserved keywords as diagram identifiers or aliases, case-insensitive; rename participants/nodes/subgraphs to neutral terms before trying preview fixes.
+
+
+
+
+
+
+## drawio.md
+- In .drawio XML attributes, do not use literal \\n for multiline labels; use &#xa; (or &#10;) to render line breaks reliably.
+- For dense diagrams, prefer edge-carried labels (edge value) over detached text boxes for interface semantics.
+- If readability is poor, use hidden helper edges plus visible foreground -fg edges with explicit anchors/waypoints.
+## preferences.md
+- During active demo exploration, keep architecture discussions and agent-definition planning in the corresponding docs/dev-diary entry rather than formal architecture/guides.
+- Do not back-edit older demo diaries to carry new demo planning; create or use the current demo diary instead.
+- Only promote demo conclusions into formal architecture/guides after the demo succeeds and the user explicitly asks for the summary to be formalized.
+
+- Execution style preference: when user assigns implementation work, execute continuously end-to-end without pausing; only ask questions up front if a major decision/blocker exists, ask once in a consolidated way, then continue to completion.
+- Documentation preference: for architecture/design docs, combine vivid global explanation with deep implementation-level detail; avoid treating them as lightweight introductions only.
+
+## terminal-execution.md
+- Windows terminal execution rule: for any AI-initiated terminal work in this repo on Windows, default to PowerShell and keep a single shell unless there is a documented reason to switch; do not drift into CMD/bash implicitly, and re-establish PowerShell explicitly before running commands that depend on PowerShell syntax.
+
+## windows-scripts.md
+- Windows PowerShell lesson: when suppressing extra child consoles for Python/Node services, prefer Start-Process with hidden/no-window behavior plus stdout/stderr redirection over custom .NET ProcessStartInfo.ArgumentList wrappers; older hosts may not expose ArgumentList, and over-customizing process launch can break startup.
+- Windows script invocation rule: for any AI-initiated repo script or terminal-driven service flow, prefer a stable wrapper script path over ad-hoc inline commands; preserve spaces and special characters by avoiding native argument splitting, keep failure output visible instead of flashing closed, and bypass proxy-sensitive localhost health checks for script-managed services.
+- Windows script logging rule: color script log windows by parsed severity and message type, not by stdout/stderr alone; give stream tags their own colors and separate uvicorn access logs into a distinct color family.
+
+- Cross-platform encoding rule for shell-driven services: UTF-8 should be the default for logs/stdout/stderr on Windows, Linux, and macOS. In script launchers, explicitly set process-level UTF-8 when supported (e.g., Python via PYTHONUTF8=1 and PYTHONIOENCODING=utf-8) because Windows code pages can still cause Unicode crashes even when console text looks fine.
+- Windows readiness-check rule: avoid relying only on Get-NetTCPConnection/net-table snapshots for startup gating; they can produce false negatives during process warm-up. Prefer direct TCP connect probing (localhost + port), then optional HTTP liveness checks. If logs already show markers like "Application startup complete" or "Uvicorn running", treat timeout as detector logic bug first, not service startup failure.
+
+- Windows service postmortem rule: when a page still shows old behavior after a claimed restart, assume process reuse or orphaned child ownership before assuming the new code failed. Verify the real listener on the target port, inspect PID-file truth against port ownership, and prefer explicit stop + port cleanup over repeated start attempts.
+- Windows launcher hygiene rule: PID files are advisory, not truth. For long-running demo services, startup and shutdown paths must reconcile PID files with live port listeners and clean up child Python/Node processes that survived their parent shell, otherwise the UI can keep serving stale code from an older worker.
+
+
+</userMemory>
+<sessionMemory>
+Session memory (/memories/session/) is empty. No session notes have been created yet.
+</sessionMemory>
+<repoMemory>
+Repository memory (/memories/repo/) is empty. No workspace-scoped notes have been created yet.
+</repoMemory>
+
+
+[copilot_cache_control: { type: 'ephemeral' }]
+~~~
+
+### User
+~~~md
+<context>
+The current date is March 28, 2026.
+Terminals:
+Terminal: pwsh
+
+</context>
+<reminderInstructions>
+You are an agent—keep going until the user's query is completely resolved before ending your turn. ONLY stop if solved or genuinely blocked.
+Take action when possible; the user expects you to do useful work without unnecessary questions.
+After any parallel, read-only context gathering, give a concise progress update and what's next.
+Avoid repetition across turns: don't restate unchanged plans or sections (like the todo list) verbatim; provide delta updates or only the parts that changed.
+Tool batches: You MUST preface each batch with a one-sentence why/what/outcome preamble.
+Progress cadence: After 3 to 5 tool calls, or when you create/edit > ~3 files in a burst, report progress.
+Requirements coverage: Read the user's ask in full and think carefully. Do not omit a requirement. If something cannot be done with available tools, note why briefly and propose a viable alternative.
+
+</reminderInstructions>
+<userRequest>
+hello
+</userRequest>
+
+
+[copilot_cache_control: { type: 'ephemeral' }]
+~~~
+
+
+
+## Response
+### Assistant
+~~~md
+Hello. What do you need help with?
+~~~
+
+
+<style>
+[id^="system"], [id^="user"], [id^="assistant"] {
+		margin: 4px 0 4px 0;
+}
+
+.markdown-body > pre {
+		padding: 4px 16px;
+}
+</style>

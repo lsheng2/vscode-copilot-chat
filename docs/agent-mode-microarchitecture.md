@@ -1,12 +1,14 @@
-# Copilot Chat Agent Mode 设计文档导航
+# Copilot Chat Agent Mode 设计文档导航与总览研究
 
 ## 文档定位
 
-本文是 Copilot Chat Agent Mode 设计文档的导航页，用于说明该能力的总体定位、文档结构、推荐阅读路径与源码索引。
+本文是 Copilot Chat Agent Mode 设计文档的导航页，同时也是一份独立可读的总览研究报告，用于说明该能力的总体定位、运行时骨架、文档结构、推荐阅读路径与源码索引。
 
 完整文档拆分为“架构设计（上篇）”与“执行链路与自治机制（下篇）”。这种拆分方式的目的，是将静态架构视图与动态运行时视图分离，降低单篇文档的认知负担，同时便于后续独立演进。
 
 这三份文档不只承担“简介”角色，也承担“设计导读 + 实现读码入口”的角色。因此它们既要给第一次接触 Agent Mode 的读者建立直观全局图景，也要给已经准备跟源码的人提供足够细的实现落点与责任边界。
+
+本文还吸收了三个场景化研究样本的结论：最小的 `hello`、真正展开多轮工具循环的 `create-file`、以及大代码库研究链路的 `database qna`。它们在这里的作用不是替代主文档，而是帮助总览页把几个最常见的误读直接收掉。
 
 ## Executive Summary
 
@@ -34,6 +36,26 @@
 | 复杂问题处理 | 通过多轮计划-执行-反馈闭环逐步逼近目标 |
 | 稳定性 | 通过工具约束、轮次上限、hook 和权限机制控制风险 |
 | 可观测性 | 通过 transcript 和 trajectory 把执行过程从黑盒变成可回放系统 |
+
+如果只记三条最容易帮助校准认知的结论，可以记下面这三句：
+
+1. Agent Mode 不是“模型先回答，再临时决定要不要当 Agent”，而是代码先把请求送上 Agent 车道，模型再在这条车道里决定动作。
+2. 进入 Agent 车道不等于一定会出现很多轮工具调用；`hello` 这种 greeting 也可以在首轮直接收口。
+3. `cached tokens`、prompt cache 和 `previous_response_id` 不是一个概念；`create-file` 证明了真正的多轮 continuation 还需要单独的 provider 续接句柄。
+
+---
+
+## 三个校准样本
+
+如果把三份场景研究当成“校准样本”，它们最有价值的不是复述细节，而是限制错误理解：
+
+| 样本 | 它帮你排除什么误解 | 它真正说明什么 |
+| --- | --- | --- |
+| [hello：最小 Agent 样本](./example%20-%20chat%20with%20simple%20hello/hello-agent-panel-case-study.md) | “只要进了 Agent 就一定会出现多轮工具执行”；“看到 todo read 就等于模型先调用了工具”；“看到 cached tokens 就说明发生了 continuation” | Agent 骨架可以在首轮直接收口；`manage_todo_list(read)` 更像 prompt 组装期上下文探测；单轮 cache read 只说明稳定前缀被复用 |
+| [create-file：满载 Agent 样本](./example%20-%20create%20a%20file/create-file-agent-panel-case-study.md) | “approval 是在最终回答层弹出”；“create_file 失败后一定有硬编码恢复器”；“所有 provider 的 cache 与 response id 都是一回事” | 同一条 Agent 骨架可以展开成多轮目标导向闭环；approval 插在工具层；工具错误会作为下一轮真实世界反馈回灌；Responses API continuation 和普通 prompt cache 是不同层级的优化 |
+| [database qna：研究型 Agent 样本](./example%20-%20database%20qna/agent-mode-codebase-qa-case-study.md) | “大代码库 Q&A 一定等于单一 RAG”；“复杂问题默认会起 SearchSubagent”；“trajectory 就是运行时全部真相” | 主代理可以长期停留在只读研究 loop 中；`Codebase` 预取、`SearchSubagent`、`runSubagent` 分属不同层；request logger 往往比 trajectory 更接近 transport 真相 |
+
+因此，这三份场景稿在总览页里的正确位置不是“主文档的附庸”，而是“主文档结论的实证边界”。
 
 ---
 
@@ -63,6 +85,8 @@ flowchart TD
 
 这张图里有一个容易混淆但非常关键的点：**Capability Layer 出现在模型调用之前，而不是之后**。因为在真实实现里，当前轮可见工具会先被计算出来，再被装入 prompt，模型只能在这个受约束的工具集合里做选择。
 
+`database qna` 样本还能再帮这张图补一个限定：`Codebase` 更像 Prompt/Capability 边界上的局部上下文增强，`SearchSubagent` 才是独立的小型代理 loop，所以不要把 `Codebase` 误画成第四条代理链，也不要把“复杂检索”误画成必经的子代理阶段。
+
 ---
 
 ## 文档结构
@@ -81,6 +105,26 @@ flowchart TD
 
 [下篇：Copilot Chat Agent Mode 执行链路与自治机制](./agent-mode-execution-design-part2.md)
 
+### 场景化 Case Study
+
+[hello 场景综合 Case Study：从一个干净窗口里的 hello 看穿 Chat Panel + Agent](./example%20-%20chat%20with%20simple%20hello/hello-agent-panel-case-study.md)
+
+[create-file 场景综合 Case Study：从一句创建文件请求看穿多轮工具循环](./example%20-%20create%20a%20file/create-file-agent-panel-case-study.md)
+
+[database qna 场景综合 Case Study：从一次大代码库问答看穿检索、子代理与观测层](./example%20-%20database%20qna/agent-mode-codebase-qa-case-study.md)
+
+这三份场景报告分别承担三种不同职责：
+
+- `hello` 提供最小可运行基线，适合回答路由、prompt 骨架、最短 smoke test 等问题
+- `create-file` 提供真实多轮闭环样本，适合回答 approval、tool replay、continuation、fallback 与多轮反馈等问题
+- `database qna` 提供研究型主链样本，适合回答 `Codebase`、`SearchSubagent`、request logger / trajectory / OTel 如何分层互补
+
+其中，hello 报告已经吸收了原来三份 hello 研究稿里仍然有效的部分，统一回答三类问题：
+
+- Agent 路由与 mode 预判到底在哪一层发生
+- hello 作为最小样本时，提示词与执行骨架究竟长什么样
+- 用哪些观测面最适合给这条最小链路做 smoke test
+
 下篇重点回答三个问题：
 
 - 一次 Agent 请求在运行时究竟经过了哪些步骤
@@ -98,8 +142,22 @@ flowchart TD
 | 为什么它不是普通聊天，而是执行系统 | 本文 Executive Summary | 下篇第 1、2 节 |
 | 为什么长任务还能继续跑 | 下篇第 6 节 | 下篇第 17 节中 `handleSummarizeCommand()`、`buildPrompt()`、`normalizeSummariesOnRounds()` |
 | 为什么系统有时不让停，或者明明看起来做完了还继续推 | 上篇第 8 节 | 下篇第 19、20 节 |
+| 为什么大代码库 Q&A 不一定真的起 `SearchSubagent` | 下篇第 2、4 节 | `database qna` case study 的第 10、15、18 节 |
 | 如果想直接跟源码，先抓哪些入口最划算 | 上篇第 10 到第 15 节 | 下篇第 11 到第 17 节 |
-| 如果只想知道谁负责记录轨迹和复盘 | 上篇第 5 节与第 17 节 | 下篇第 7 节 |
+| 如果只想知道谁负责记录轨迹和复盘 | 上篇第 5 节与第 17 节 | 下篇第 7 节与 `database qna` case study 的第 14 节 |
+
+---
+
+## 最短排障与验证闭环
+
+如果你的目标不是通读设计，而是尽快判断一次 Agent 请求“到底错在哪一层”，最稳妥的顺序通常不是直接翻全量源码，而是沿着下面四层镜头往外扩：
+
+1. 先看 debug / discovery：确认 instructions、hooks、agents、skills、approval、todo probe 等外围事件有没有偏移。
+2. 再看 raw request / chatreplay / request logger：确认真正送给模型的 messages、tool schema、resolved model、usage、request location，以及有没有 `renderedUserMessage`、`toolCallRounds`、`statefulMarker` 这类 transport 细节。
+3. 再看 trajectory：确认系统最终把这次请求压成了什么结构，是单轮收口、真实 tool round，还是出现了 subagent。
+4. 最后再补 transcript / OTel：分别看 turn 顺序与耗时分布。
+
+这个顺序来自三个样本的共同经验：`hello` 证明最小链路也足够覆盖 discovery、prompt 组装和结构化轨迹；`create-file` 证明一旦问题真的进入多轮执行、approval 和 continuation，前面三层依然是最快的定位入口；`database qna` 则证明 request logger 往往是区分“语义 turn”和“transport round”的关键证据层。
 
 ---
 

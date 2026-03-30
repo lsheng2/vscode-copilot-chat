@@ -1,0 +1,23 @@
+# Content Exclusion Rules
+
+## Metadata
+~~~
+fetchTime        : 526ms
+repoCount        : 1
+totalGlobRules   : 0
+totalIfAnyMatch  : 0
+totalIfNoneMatch : 0
+~~~
+
+## non-git-file
+_No rules_
+
+<style>
+[id^="system"], [id^="user"], [id^="assistant"] {
+		margin: 4px 0 4px 0;
+}
+
+.markdown-body > pre {
+		padding: 4px 16px;
+}
+</style>

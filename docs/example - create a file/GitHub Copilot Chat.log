@@ -1,0 +1,64 @@
+2026-03-28 22:09:38.287 [info] [GitExtensionServiceImpl] Initializing Git extension service.
+2026-03-28 22:09:38.288 [info] ConversationFeature: Waiting for copilot token to activate conversation feature
+2026-03-28 22:09:38.288 [info] [CopilotCLI] OpenTelemetry enabled: exporter=file, source=github.copilot
+2026-03-28 22:09:38.288 [info] [CopilotCLI] MCP server started. Lock file: C:\Users\lsheng2\.copilot\ide\9de213fb-5cee-4100-8077-02b5ef8bf826.lock
+2026-03-28 22:09:38.288 [info] [CopilotCLI] Server URI: pipe:%5C%5C.%5Cpipe%5Cmcp-74886945-3cc7-46d9-8465-c8e2ebcbcc46.sock#%2Fmcp
+2026-03-28 22:09:38.288 [info] Logged in as lsheng2
+2026-03-28 22:09:38.288 [info] Using the Electron fetcher.
+2026-03-28 22:09:38.367 [info] [GitExtensionServiceImpl] Successfully activated the vscode.git extension.
+2026-03-28 22:09:38.367 [info] [GitExtensionServiceImpl] Enablement state of the vscode.git extension: true.
+2026-03-28 22:09:38.368 [info] [GitExtensionServiceImpl] Successfully registered Git commit message provider.
+2026-03-28 22:09:39.808 [info] Got Copilot token for lsheng2
+2026-03-28 22:09:39.808 [info] Copilot Chat: 0.41.2, VS Code: 1.113.0
+2026-03-28 22:09:39.833 [info] [context keys] Setting context key: github.copilot-chat.activated
+2026-03-28 22:09:39.834 [info] activationBlocker from 'languageModelAccess' took for 3819ms
+2026-03-28 22:09:40.148 [info] AuthenticationService: firing onDidAuthenticationChange from handleAuthChangeEvent. Has token: true
+2026-03-28 22:09:40.148 [info] copilot token sku: copilot_for_business_seat_quota
+2026-03-28 22:09:40.148 [info] ConversationFeature: Activating contributions
+2026-03-28 22:09:40.148 [info] GitHub.vscode-pull-request-github extension is not yet activated.
+2026-03-28 22:09:40.162 [info] Registering default platform agent...
+2026-03-28 22:09:40.163 [info] ConversationFeature: onDidAuthenticationChange has token: true
+2026-03-28 22:09:40.164 [info] activationBlocker from 'conversationFeature' took for 4164ms
+2026-03-28 22:09:40.170 [warning] Copilot preview features are disabled by organizational policy. Learn more: https://aka.ms/github-copilot-org-enable-features
+2026-03-28 22:09:40.170 [info] GithubAvailableEmbeddingTypesManager: Got embeddings. Primary: metis-1024-I16-Binary. Deprecated: 
+2026-03-28 22:09:40.172 [info] WorkspaceChunkSearchService: using embedding type metis-1024-I16-Binary
+2026-03-28 22:09:40.481 [info] Logged in as lsheng2
+2026-03-28 22:09:40.539 [info] Fetched model metadata in 4493ms 490736ce-7222-4ceb-b5a4-2cb5b6d9b017
+2026-03-28 22:09:40.763 [info] Latest entry: ccreq:latest.copilotmd
+2026-03-28 22:09:40.764 [info] ccreq:3d30cbf6.copilotmd | markdown
+2026-03-28 22:09:40.976 [info] Got Copilot token for lsheng2
+2026-03-28 22:09:40.977 [info] Copilot Chat: 0.41.2, VS Code: 1.113.0
+2026-03-28 22:09:41.012 [info] AuthenticationService: firing onDidAuthenticationChange from handleAuthChangeEvent. Has token: true
+2026-03-28 22:09:41.012 [info] copilot token sku: copilot_for_business_seat_quota
+2026-03-28 22:09:41.012 [info] ConversationFeature: onDidAuthenticationChange has token: true
+2026-03-28 22:09:41.015 [warning] Copilot preview features are disabled by organizational policy. Learn more: https://aka.ms/github-copilot-org-enable-features
+2026-03-28 22:09:41.262 [info] Fetched model metadata in 255ms 02eec94b-80e0-4566-9e6a-7f8448b26ce6
+2026-03-28 22:09:41.267 [info] ccreq:8ec9246f.copilotmd | markdown
+2026-03-28 22:12:39.000 [info] message 0 returned. finish reason: [stop]
+2026-03-28 22:12:39.004 [info] request done: requestId: [dbd6fba7-5880-4357-b081-bac3b10f022f] model deployment ID: []
+2026-03-28 22:12:39.007 [info] ccreq:b1faca75.copilotmd | success | gpt-4o-mini-2024-07-18 | 777ms | [title]
+2026-03-28 22:12:42.665 [info] message 0 returned. finish reason: [stop]
+2026-03-28 22:12:42.667 [info] request done: requestId: [581c5d9d-cb81-4292-8b84-5aa3bf6c8c7f] model deployment ID: []
+2026-03-28 22:12:42.669 [info] ccreq:75c1f73e.copilotmd | success | gpt-4o-mini-2024-07-18 | 875ms | [progressMessages]
+2026-03-28 22:12:43.204 [warning] [virtual-tools] Had to drop 2 tools due to limit constraints
+2026-03-28 22:12:43.457 [warning] [virtual-tools] Had to drop 3 tools due to limit constraints
+2026-03-28 22:12:46.208 [info] message 0 returned. finish reason: [stop]
+2026-03-28 22:12:46.210 [info] request done: requestId: [7b09e85a-36a3-4858-af2b-18da5865896e] model deployment ID: []
+2026-03-28 22:12:46.211 [info] ccreq:90f4d148.copilotmd | success | gpt-4o-mini-2024-07-18 | 4421ms | [progressMessages]
+2026-03-28 22:12:52.021 [info] ccreq:91527465.copilotmd | success | gpt-5.4 -> gpt-5.4-2026-03-05 | 8207ms | [panel/editAgent]
+2026-03-28 22:12:55.677 [info] ccreq:920b29ed.copilotmd | success | gpt-5.4 -> gpt-5.4-2026-03-05 | 1900ms | [panel/editAgent]
+2026-03-28 22:12:56.532 [info] message 0 returned. finish reason: [stop]
+2026-03-28 22:12:56.537 [info] request done: requestId: [6ebdf0fc-dad1-400e-8673-ec5813ed90ba] model deployment ID: []
+2026-03-28 22:12:56.539 [info] ccreq:a44706d8.copilotmd | success | gpt-4o-mini -> gpt-4o-mini-2024-07-18 | 612ms | [copilotLanguageModelWrapper]
+2026-03-28 22:12:59.603 [error] Error from tool create_file with args {"filePath":"C:\\Users\\lsheng2\\a.txt","content":"abc"}: File already exists. You must use an edit tool to modify it.: Error: File already exists. You must use an edit tool to modify it.
+	at FDe.invoke (c:\Users\lsheng2\.vscode\extensions\github.copilot-chat-0.41.2\dist\extension.js:5552:1362)
+	at async Nw.$invokeTool (file:///c:/Users/lsheng2/AppData/Local/Programs/Microsoft%20VS%20Code/cfbea10c5f/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:591:3821)
+2026-03-28 22:13:03.840 [info] ccreq:f0c0a65a.copilotmd | success | gpt-5.4 -> gpt-5.4-2026-03-05 | 4214ms | [panel/editAgent]
+2026-03-28 22:13:04.670 [info] Fetched content exclusion rules in 526ms
+2026-03-28 22:13:04.670 [info] ccreq:8a8305bf.copilotmd | markdown
+2026-03-28 22:13:11.533 [info] ccreq:a1570d24.copilotmd | success | gpt-5.4 -> gpt-5.4-2026-03-05 | 2516ms | [panel/editAgent]
+2026-03-28 22:13:12.240 [info] message 0 returned. finish reason: [stop]
+2026-03-28 22:13:12.243 [info] request done: requestId: [7711dd03-9cc3-4cb3-b14d-9a22d989df63] model deployment ID: []
+2026-03-28 22:13:12.245 [info] ccreq:d087cabb.copilotmd | success | gpt-4o-mini -> gpt-4o-mini-2024-07-18 | 545ms | [copilotLanguageModelWrapper]
+2026-03-28 22:13:23.254 [info] ccreq:84bb6208.copilotmd | success | gpt-5.4 -> gpt-5.4-2026-03-05 | 4626ms | [panel/editAgent]
+2026-03-28 22:13:23.267 [info] [ToolCallingLoop] Stop hook result: shouldContinue=false, reasons=undefined
